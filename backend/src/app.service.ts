@@ -5,7 +5,7 @@ export class AppService {
   getHello(): any {
     return {
       message: 'Kết nối thành công!',
-      user: 'Tuấn Đăng',
+      user: 'Trần Tuấn Đăng',
       role: 'IT Intern',
     };
   }

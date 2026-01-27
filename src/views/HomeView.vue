@@ -1,72 +1,77 @@
 <script setup>
-import { ref, onMounted } from 'vue' // Thêm onMounted
+import { ref, onMounted, watch } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
 import { useCartStore } from '../stores/cart'
-import axios from 'axios' // Bước A: Import axios
+import { useSearchStore } from '../stores/search'
+import axios from 'axios'
+import { useToast } from 'vue-toastification'
 
 const cart = useCartStore()
-
-// Để mảng trống ban đầu
 const products = ref([])
-const backendInfo = ref(null) // Để lưu thông tin "IT Intern"
+const backendInfo = ref(null)
+const searchStore = useSearchStore()
+const toast = useToast()
 
-// Bước B: Gọi API khi trang vừa mở
+// Hàm lấy danh sách sản phẩm (có hỗ trợ tìm kiếm)
+const fetchProducts = async () => {
+  try {
+    const resProducts = await axios.get('http://localhost:3000/products', {
+      params: { search: searchStore.searchQuery }, // Gửi query param 'search' lên NestJS
+    })
+    products.value = resProducts.data
+  } catch (error) {
+    console.error('Lỗi khi tải sản phẩm:', error)
+  }
+}
+
+// Hàm mới để vừa thêm vào giỏ, vừa hiện thông báo
+const handleAddToCart = (product) => {
+  cart.addToCart(product)
+  toast.success(`Đã thêm ${product.name} vào giỏ hàng!`, {
+    timeout: 3000,
+  })
+}
+
+// Theo dõi searchQuery, khi người dùng nhập chữ sẽ tự động gọi lại API
+watch(
+  () => searchStore.searchQuery,
+  () => {
+    fetchProducts()
+  },
+)
+
 onMounted(async () => {
   try {
-    // 1. Lấy thông tin chào mừng (cổng 3000)
     const resInfo = await axios.get('http://localhost:3000')
     backendInfo.value = resInfo.data
-
-    // 2. Tạm thời dùng lại dữ liệu cũ nhưng gán qua API (sau này bạn sẽ viết API /products bên Nest)
-    products.value = [
-      { id: 1, name: 'Trà Sữa (từ Nest)', price: 50000 },
-      { id: 2, name: 'Gà Rán (từ Nest)', price: 50000 },
-      { id: 3, name: 'Pizza (từ Nest)', price: 150000 },
-      { id: 4, name: 'Mì Cay (từ Nest)', price: 65000 },
-      { id: 5, name: 'Tokbokki (từ Nest)', price: 65000 },
-    ]
+    fetchProducts() // Hàm lấy sản phẩm lần đầu
   } catch (error) {
-    console.error('Lỗi kết nối Backend', error)
+    console.error('Lỗi kết nối Backend:', error)
   }
 })
-
-// Các phần style giữ nguyên...
-const containerStyle = { display: 'flex', gap: '20px' }
-const productStyle = { flex: '2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }
-const cartSummaryStyle = { flex: '1', background: '#f9f9f9', padding: '20px' }
 </script>
 
 <template>
   <div class="home">
-    <h1>Cửa Hàng Đồ Ăn Nhanh</h1>
-
     <div
       v-if="backendInfo"
-      style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 10px"
+      class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8 shadow-sm"
     >
-      <p>{{ backendInfo.message }}</p>
-      <p>Lập trình viên: {{ backendInfo.user }} - {{ backendInfo.role }}</p>
+      <p class="text-blue-800 font-medium">{{ backendInfo.message }}</p>
+      <p class="text-blue-600 text-sm italic">
+        Lập trình viên: {{ backendInfo.user }} - {{ backendInfo.role }}
+      </p>
     </div>
 
-    <div :style="containerStyle">
-      <div class="products" :style="productStyle">
-        <ProductCard v-for="p in products" :key="p.id" :product="p" @add-to-cart="cart.addToCart" />
-      </div>
-
-      <div class="cart-summary" :style="cartSummaryStyle">
-        <h2>Giỏ hàng ({{ cart.totalItems }})</h2>
-        <div v-for="item in cart.items" :key="item.id">{{ item.name }} x {{ item.quantity }}</div>
-        <hr />
-        <p>
-          <strong>Tổng cộng: {{ cart.totalPrice }}đ</strong>
-        </p>
+    <div class="flex flex-col lg:flex-row gap-8">
+      <div class="flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <ProductCard
+          v-for="p in products"
+          :key="p.id"
+          :product="p"
+          @add-to-cart="handleAddToCart"
+        />
       </div>
     </div>
   </div>
 </template>
-
-###Việc bạn tách biệt dữ liệu như thế này rất sát với thực tế dự án **Clinic Management System** hay
-**Lead Management** **Frontend (Vue3)**: Chỉ lo việc vẽ giao diện và bắt sự kiện người dùng. *
-**Backend (NestJS)**: Quản lý toàn bộ thông tin sản phẩm, giá cả và thông tin người dùng. ** Nếu khi
-chạy `npm run dev` mà bạn thấy chữ "IT Intern" hiện lên trên giao diện bán hàng, nghĩa là bạn đã
-hoàn thành xuất sắc việc kết nối Fullstack đầu tiên của mình!

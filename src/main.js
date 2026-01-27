@@ -1,14 +1,25 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
-import { createPinia } from 'pinia' // thư viện quản lý lưu dữ liệu
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
+
 const app = createApp(App)
 
-// gọi pinia trước vì cần đảm bảo dữ liệu để gọi
-app.use(createPinia()) 
+const toastOptions = {
+  position: 'top-center',
+  timeout: 2000,
+  closeOnClick: true,
+  pauseOnHover: true,
+}
+
+app.use(createPinia())
 app.use(router)
+
+app.use(Toast, toastOptions)
 
 app.mount('#app')

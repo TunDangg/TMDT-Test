@@ -1,35 +1,17 @@
 <script setup>
 defineProps(['product'])
 defineEmits(['add-to-cart'])
-
-const cardStyle = {
-  border: '1px solid #ddd',
-  padding: '15px',
-  borderRadius: '8px',
-  background: 'white',
-}
-
-const buttonStyle = {
-  id : 'button',
-  style: {
-    background: '#42b883',
-    color: 'white',
-    border: 'none',
-    padding : '5px 10px',
-    cursor: 'pointer',
-    borderRadius: '8px',
-  }
-}
-
 </script>
 
 <template>
-  <div :style = "cardStyle">
-    <h3>{{ product.name }}</h3>
-    <p>Giá: {{ product.price.toLocaleString() }}đ</p>
-    <button 
-      :style = "buttonStyle.style"
+  <div
+    class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-5 border border-gray-100"
+  >
+    <h3 class="text-lg font-bold text-gray-800 mb-2">{{ product.name }}</h3>
+    <p class="text-orange-600 font-semibold mb-4">Giá: {{ product.price.toLocaleString() }}đ</p>
+    <button
       @click="$emit('add-to-cart', product)"
+      class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
     >
       Thêm vào giỏ
     </button>

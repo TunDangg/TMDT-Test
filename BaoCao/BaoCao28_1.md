@@ -26,3 +26,15 @@
 
 - **Thiết kế Database:**
 - **Kết nối hệ thống:**
+
+# Phần tiếp Conventional Commits, typescript-eslint
+
+- **Conventional Commits**
+- **<type>[optional scope]: <description> ** Định dạng mỗi lần sửa đổi lên git với
+  - ** type ** hiểu là loại chỉnh sửa, chỉnh sửa mục đích gì : feat tạo thêm code mới, fix sửa lỗi, docs sửa báo cáo,...
+  - ** optional scope ** hiểu là phạm vi chỉnh sửa ở đoạn nào
+  - ** description ** mô tả xem mình đã làm gì thêm giao diện hay là sửa lỗi
+
+- **typescript-eslint**
+  - ** Công cụ sẽ chỉ ra lỗi sai ngay khi đang gõ code theo cơ thế real-time **
+  - ** Lỗi sẽ hiện lên ở 3 nơi để phát hiện: Gạch chân trực tiếp ngay trên trang code, hiện trong danh sách lỗi của IDE và hiện chi tiết cụ thể lỗi sai kèm tên file, dòng nào, cột nào trong console và terminal. **

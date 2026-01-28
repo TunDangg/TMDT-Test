@@ -1,4 +1,4 @@
-# BÁO CÁO TIẾN ĐỘ DỰ ÁN: THƯƠNG MẠI ĐIỆN TỬ (E-COMMERCE)
+# BÁO CÁO TIẾN ĐỘ DỰ ÁN
 
 # Ngày 28/01/2026
 
@@ -22,7 +22,7 @@
 - **Cấu hình MySQL:** Gặp lỗi khi khởi tạo dịch vụ MySQL trên máy Mac nhưng đã xử lý bằng cách cấu hình lại `mysql_secure_installation`.
 - **CORS Policy:** Gặp lỗi chặn yêu cầu khi chạy tích hợp FE và BE. Đã tìm ra phương án `app.enableCors()` trong NestJS để khắc phục.
 
-# 4. Kế hoạch tiếp theo
+# 4. Dự định tiếp theo
 
 - **Thiết kế Database:**
 - **Kết nối hệ thống:**

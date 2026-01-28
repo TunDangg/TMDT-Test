@@ -1,44 +1,28 @@
-# 01-first-project
+# BÁO CÁO TIẾN ĐỘ DỰ ÁN
 
-This template should help get you started developing with Vue 3 in Vite.
+# Ngày 28/01/2026
 
-## Recommended IDE Setup
+# Công việc đã hoàn thành
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+# 1. Thiết lập môi trường hệ thống
 
-## Recommended Browser Setup
+- **Cơ sở dữ liệu:** Cài đặt và cấu hình thành công **MySQL** trên macOS thông qua Homebrew. Xử lý được vấn đề phân quyền truy cập root.
+- **Công cụ lập trình (IDE):** Chuyển đổi mã nguồn sang 3 IDE JetBrains bằng tài khoản Education.
+  - **WebStorm** cho Frontend
+  - **IntelliJ IDEA** cho Backend
+  - **DataGrip** với MySQL để quản trị dữ liệu trực quan hơn
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+# 2. Tìm hiểu lại về CORS
 
-## Customize configuration
+- **Tìm hiểu về CORS:** Hiểu được CORS là cơ chế bảo mật giống người gác cổng xem web có được lấy dữ liệu từ miền khác không.
+- **Cấu trúc dự án:** Phân tách rõ ràng luồng xử lý giữa Client-side và Server-side trong mô hình Thương mại điện tử.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+# 3. Khó khăn & Vướng mắc
 
-## Project Setup
+- **Cấu hình MySQL:** Gặp lỗi khi khởi tạo dịch vụ MySQL trên máy Mac nhưng đã xử lý bằng cách cấu hình lại `mysql_secure_installation`.
+- **CORS Policy:** Gặp lỗi chặn yêu cầu khi chạy tích hợp FE và BE. Đã tìm ra phương án `app.enableCors()` trong NestJS để khắc phục.
 
-```sh
-npm install
-```
+# 4. Kế hoạch tiếp theo
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+- **Thiết kế Database:**
+- **Kết nối hệ thống:**

@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
+import { Product } from './entities/product.entity';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Product])], // Bắt buộc phải có dòng này
   controllers: [ProductsController],
   providers: [ProductsService],
 })

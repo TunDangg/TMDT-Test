@@ -6,7 +6,7 @@ export class AppService {
     return {
       message: 'Kết nối thành công!',
       user: 'Trần Tuấn Đăng',
-      role: 'IT Intern',
+      role: 'Admin',
     };
   }
 }

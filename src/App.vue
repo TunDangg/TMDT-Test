@@ -14,7 +14,7 @@ const isCartOpen = ref(false)
   <header class="bg-white shadow-md sticky top-0 z-50">
     <nav class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-2 shrink-0">
-        <h1 class="font-bold text-xl text-orange-600">Fast Food Store</h1>
+        <h1 class="font-bold text-xl text-orange-600">EDTEXCO Fast Food Store</h1>
       </div>
 
       <div class="flex-grow max-w-xl relative">
@@ -29,7 +29,7 @@ const isCartOpen = ref(false)
 
       <div class="flex items-center gap-6 font-medium text-gray-600">
         <RouterLink to="/" class="hover:font-bold hover:scale-110 transition-all"
-          >Trang chủ</RouterLink
+          >Đăng Nhập</RouterLink
         >
 
         <div

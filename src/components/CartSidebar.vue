@@ -1,8 +1,20 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 const cart = useCartStore()
 defineProps(['isOpen'])
-defineEmits(['close'])
+
+const router = useRouter()
+
+const goToCheckout = () => {
+  // 1. Đóng sidebar lại trước (phát ra sự kiện 'close' để Component cha nhận được)
+  emit('close')
+
+  // 2. Sau đó mới chuyển trang
+  router.push('/checkout')
+}
+
+const emit = defineEmits(['close'])
 </script>
 
 <template>
@@ -37,7 +49,7 @@ defineEmits(['close'])
 
           <div class="flex items-center bg-white border rounded-lg px-2 py-1 gap-3 ml-2">
             <button
-              @click="cart.decreaseQuantity(item.id)"
+              @click="cart.removeFromCart(item.id)"
               class="text-gray-400 hover:text-red-600 font-bold w-4"
             >
               −
@@ -59,6 +71,7 @@ defineEmits(['close'])
           <span class="text-red-600">{{ cart.totalPrice.toLocaleString() }}đ</span>
         </div>
         <button
+          @click="goToCheckout"
           class="w-full bg-[#b32d34] text-white py-4 rounded-xl font-bold hover:bg-red-700 transition shadow-lg active:scale-95"
         >
           Thanh Toán Ngay

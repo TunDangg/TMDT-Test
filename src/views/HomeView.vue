@@ -40,15 +40,26 @@ watch(
   },
 )
 
-onMounted(async () => {
-  try {
-    const resInfo = await axios.get('http://localhost:3000')
-    backendInfo.value = resInfo.data
-    fetchProducts() // Hàm lấy sản phẩm lần đầu
-  } catch (error) {
-    console.error('Lỗi kết nối Backend:', error)
-  }
+// onMounted(async () => {
+//   try {
+//     const resInfo = await axios.get('http://localhost:3000')
+//     backendInfo.value = resInfo.data
+//     fetchProducts() // Hàm lấy sản phẩm lần đầu
+//   } catch (error) {
+//     console.error('Lỗi kết nối Backend:', error)
+//   }
+// })
+// ---------- Sửa qua code này nhưng đang chưa hiểu lí do tại sao, lỗi do await ----------
+onMounted(() => {
+  fetchProducts() // Chạy hàm này trước để lấy sản phẩm ngay lập tức
+
+  // Việc lấy thông tin hệ thống để sau, lỗi cũng không sao
+  axios
+    .get('http://localhost:3000')
+    .then((res) => (backendInfo.value = res.data))
+    .catch((err) => console.warn('Hệ thống chưa có thông tin chào mừng'))
 })
+// ---------------------------------------------------------------------------------------
 </script>
 
 <template>
@@ -59,7 +70,7 @@ onMounted(async () => {
     >
       <p class="text-blue-800 font-medium">{{ backendInfo.message }}</p>
       <p class="text-blue-600 text-sm italic">
-        Lập trình viên: {{ backendInfo.user }} - {{ backendInfo.role }}
+        Người Dùng: {{ backendInfo.user }} - {{ backendInfo.role }}
       </p>
     </div>
 

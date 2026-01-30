@@ -33,6 +33,7 @@ export const useCartStore = defineStore('cart', {
         this.deleteItem(productId)
       }
     },
+
     deleteItem(productId) {
       this.items = this.items.filter((i) => i.id !== productId)
     },

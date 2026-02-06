@@ -1,11 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto } from './dto/create-product.dto'; // DTO kiểm soát dữ liệu đầu vào
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+  // constructor dùng để thiết lập giá trị ban đầu và phổ biến nhất là
+  // thực hiện Dependency Injection (tiêm phụ thuộc) để kết nối các service hoặc repository vào controller
 
   @Post()
   create(@Body() createProductDto: CreateProductDto) {

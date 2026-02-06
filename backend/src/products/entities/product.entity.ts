@@ -1,3 +1,4 @@
+// định nghĩa cấu trúc bảng trong database
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('products')

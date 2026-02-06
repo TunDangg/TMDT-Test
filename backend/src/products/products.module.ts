@@ -6,6 +6,7 @@ import { Product } from './entities/product.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Product])], // Bắt buộc phải có dòng này
+  //forFeature giúp giới hạn rằng module này chỉ được phép thao tác với những Entity nào được khai báo
   controllers: [ProductsController],
   providers: [ProductsService],
 })

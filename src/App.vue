@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { useCartStore } from './stores/cart'
@@ -7,7 +7,8 @@ import { useSearchStore } from './stores/search'
 
 const searchStore = useSearchStore()
 const cart = useCartStore()
-const isCartOpen = ref(false)
+const isCartOpen = ref<boolean>(false)
+
 </script>
 
 <template>

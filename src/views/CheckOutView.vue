@@ -1,5 +1,5 @@
-<script setup>
-import { useCartStore } from '../stores/cart' // Kiểm tra kỹ đường dẫn này
+<script setup lang="ts">
+import { useCartStore } from '../stores/cart'
 const cart = useCartStore()
 </script>
 

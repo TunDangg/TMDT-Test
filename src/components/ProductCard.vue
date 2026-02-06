@@ -1,6 +1,13 @@
-<script setup>
-defineProps(['product'])
-defineEmits(['add-to-cart'])
+<script setup lang="ts">
+import { Products } from '@/types'
+
+defineProps<{
+  product: Products
+}>()
+
+const emit = defineEmits<{
+  (e: 'add-to-cart', product: Products): void
+}>()
 </script>
 
 <template>

@@ -1,8 +1,10 @@
+// File Service này là nơi bạn viết mọi logic "thông minh" cho ứng dụng
+// hoạt động dựa trên file entity
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like } from 'typeorm'; // Repository chứa các hàm có sẵn find, save, delete để thao tác với bảng database
 import { Product } from './entities/product.entity'; // Đảm bảo đường dẫn này đúng
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto } from './dto/create-product.dto'; // DTO kiểm soát dữ liệu đầu vào
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
@@ -12,7 +14,7 @@ export class ProductsService {
     private productsRepository: Repository<Product>,
   ) {}
 
-  // Lấy dữ liệu từ MySQL (bao gồm cả MacBook Pro M2 bạn vừa thêm)
+  // Lấy dữ liệu từ MySQL
   async findAll(search?: string): Promise<Product[]> {
     if (search) {
       return await this.productsRepository.find({

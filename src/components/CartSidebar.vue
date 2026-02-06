@@ -1,11 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { useToast } from 'vue-toastification'
+
 const cart = useCartStore()
-defineProps(['isOpen'])
+const toast = useToast()
+
+defineProps<{
+  isOpen: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
 
 const router = useRouter()
-
 const goToCheckout = () => {
   // 1. Đóng sidebar lại trước (phát ra sự kiện 'close' để Component cha nhận được)
   emit('close')
@@ -14,7 +23,15 @@ const goToCheckout = () => {
   router.push('/checkout')
 }
 
-const emit = defineEmits(['close'])
+const handleAddMore = (item) => {
+  const result = cart.addToCart(item)
+  if (!result.success) {
+    toast.error(result.message, {
+      timeout: 3000,
+    })
+  }
+}
+
 </script>
 
 <template>
@@ -56,7 +73,7 @@ const emit = defineEmits(['close'])
             </button>
             <span class="font-bold text-sm min-w-[15px] text-center">{{ item.quantity }}</span>
             <button
-              @click="cart.addToCart(item)"
+              @click="handleAddMore(item)"
               class="text-gray-400 hover:text-red-600 font-bold w-4"
             >
               +

@@ -1,38 +1,59 @@
-<script setup>
-import { ref, onMounted, watch } from 'vue'
-import ProductCard from '../components/ProductCard.vue'
-import { useCartStore } from '../stores/cart'
-import { useSearchStore } from '../stores/search'
-import axios from 'axios'
-import { useToast } from 'vue-toastification'
+<script setup lang="ts">
+/* --- PHẦN IMPORT: Khai báo các công cụ sẽ sử dụng --- */
+// ref: Tạo biến phản ứng (đổi giá trị là giao diện đổi theo).
+// onMounted: Chạy code ngay sau khi trang web hiển thị xong.
+// watch: Theo dõi một biến, nếu biến đó đổi thì chạy một hành động nào đó.
+import { ref, onMounted, watch } from 'vue' // Import các hàm cốt lõi của Vue 3
+import ProductCard from '../components/ProductCard.vue' // Import component thẻ sản phẩm để hiển thị
+import { useCartStore } from '../stores/cart' // Import kho quản lý giỏ hàng (Pinia)
+import { useSearchStore } from '../stores/search' // Import kho quản lý tìm kiếm (Pinia)
+import axios from 'axios' // Thư viện để gọi API (lấy dữ liệu từ server)
+import { useToast } from 'vue-toastification' // Thư viện hiển thị thông báo "pop-up" nhanh
 
-const cart = useCartStore()
-const products = ref([])
-const backendInfo = ref(null)
-const searchStore = useSearchStore()
-const toast = useToast()
+import type { Products } from '@/types' // Import kiểu dữ liệu Product
 
-// Hàm lấy danh sách sản phẩm (có hỗ trợ tìm kiếm)
+/* --- KHỞI TẠO CÁC BIẾN VÀ KHO LƯU TRỮ --- */
+const cart = useCartStore() // Kích hoạt kho giỏ hàng Pinia.
+const products = ref<Products[]>([]) // Tạo mảng rỗng để chứa danh sách sản phẩm lấy từ API.
+const backendInfo = ref(null) // Biến chứa thông tin từ server
+const searchStore = useSearchStore() // Kết nối với kho chứa từ khóa tìm kiếm.
+const toast = useToast() // Tạo biến 'toast' để gọi lệnh hiện thông báo
+
+/* --- CÁC HÀM XỬ LÝ LOGIC --- */
+
+// Hàm gọi API để lấy danh sách sản phẩm
 const fetchProducts = async () => {
   try {
-    const resProducts = await axios.get('http://localhost:3000/products', {
-      params: { search: searchStore.searchQuery }, // Gửi query param 'search' lên NestJS
+    // Gửi yêu cầu GET đến server NestJS, kèm theo tham số tìm kiếm (search)
+    const resProducts = await axios.get<Products[]>('http://localhost:3000/products', {
+      params: { search: searchStore.searchQuery },
     })
-    products.value = resProducts.data
+    products.value = resProducts.data // Gán dữ liệu nhận được từ server vào biến products
   } catch (error) {
-    console.error('Lỗi khi tải sản phẩm:', error)
+    console.error('Lỗi khi tải sản phẩm:', error) // Báo lỗi nếu server không phản hồi
   }
 }
 
-// Hàm mới để vừa thêm vào giỏ, vừa hiện thông báo
+// Hàm xử lý khi người dùng nhấn nút "Thêm vào giỏ"
 const handleAddToCart = (product) => {
-  cart.addToCart(product)
-  toast.success(`Đã thêm ${product.name} vào giỏ hàng!`, {
-    timeout: 3000,
-  })
+  const result = cart.addToCart(product) // Gọi hàm thêm sản phẩm trong store giỏ hàng
+
+  if (result.success) {
+    toast.success(result.message, {
+      // Hiện thông báo xanh thành công
+      timeout: 3000, // Thông báo tự đóng sau 3 giây
+    })
+  } else {
+    toast.error(result.message, {
+      // Hiện thông báo đỏ khi có lỗi
+      timeout: 3000,
+    })
+  }
 }
 
-// Theo dõi searchQuery, khi người dùng nhập chữ sẽ tự động gọi lại API
+/* --- THEO DÕI VÀ VÒNG ĐỜI --- */
+
+// 'watch' sẽ canh chừng ô tìm kiếm, người dùng gõ đến đâu - gọi API lấy sản phẩm đến đó
 watch(
   () => searchStore.searchQuery,
   () => {
@@ -40,26 +61,19 @@ watch(
   },
 )
 
-// onMounted(async () => {
-//   try {
-//     const resInfo = await axios.get('http://localhost:3000')
-//     backendInfo.value = resInfo.data
-//     fetchProducts() // Hàm lấy sản phẩm lần đầu
-//   } catch (error) {
-//     console.error('Lỗi kết nối Backend:', error)
-//   }
-// })
-// ---------- Sửa qua code này nhưng đang chưa hiểu lí do tại sao, lỗi do await ----------
-onMounted(() => {
-  fetchProducts() // Chạy hàm này trước để lấy sản phẩm ngay lập tức
+// Khi trang vừa tải xong (Mounted), thực hiện các lệnh bên dưới
+onMounted(async () => {
+  try {
+    // 1. Lấy thông tin chung từ server (ví dụ: "Chào mừng bạn quay lại")
+    const resInfo = await axios.get('http://localhost:3000')
+    backendInfo.value = resInfo.data
 
-  // Việc lấy thông tin hệ thống để sau, lỗi cũng không sao
-  axios
-    .get('http://localhost:3000')
-    .then((res) => (backendInfo.value = res.data))
-    .catch((err) => console.warn('Hệ thống chưa có thông tin chào mừng'))
+    // 2. Sau đó gọi hàm lấy danh sách sản phẩm để hiển thị lên màn hình
+    fetchProducts()
+  } catch (error) {
+    console.error('Lỗi kết nối Backend:', error)
+  }
 })
-// ---------------------------------------------------------------------------------------
 </script>
 
 <template>

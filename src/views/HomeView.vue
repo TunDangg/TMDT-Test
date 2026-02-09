@@ -9,6 +9,7 @@ import { useCartStore } from '../stores/cart' // Import kho quản lý giỏ hà
 import { useSearchStore } from '../stores/search' // Import kho quản lý tìm kiếm (Pinia)
 import axios from 'axios' // Thư viện để gọi API (lấy dữ liệu từ server)
 import { useToast } from 'vue-toastification' // Thư viện hiển thị thông báo "pop-up" nhanh
+import { computed } from 'vue'
 
 import type { Products } from '@/types' // Import kiểu dữ liệu Product
 
@@ -18,6 +19,9 @@ const products = ref<Products[]>([]) // Tạo mảng rỗng để chứa danh s�
 const backendInfo = ref(null) // Biến chứa thông tin từ server
 const searchStore = useSearchStore() // Kết nối với kho chứa từ khóa tìm kiếm.
 const toast = useToast() // Tạo biến 'toast' để gọi lệnh hiện thông báo
+
+const selectedCategory = ref('Tất cả') // Mặc định hiển thị tất cả sản phẩm
+const categories = ['Tất cả', 'Thức ăn', 'Đồ uống', 'Ăn vặt'] // Danh sách các nút sẽ hiển thị
 
 /* --- CÁC HÀM XỬ LÝ LOGIC --- */
 
@@ -51,8 +55,6 @@ const handleAddToCart = (product) => {
   }
 }
 
-/* --- THEO DÕI VÀ VÒNG ĐỜI --- */
-
 // 'watch' sẽ canh chừng ô tìm kiếm, người dùng gõ đến đâu - gọi API lấy sản phẩm đến đó
 watch(
   () => searchStore.searchQuery,
@@ -74,6 +76,14 @@ onMounted(async () => {
     console.error('Lỗi kết nối Backend:', error)
   }
 })
+
+const filteredProducts = computed(() => {
+  if (selectedCategory.value === 'Tất cả') {
+    return products.value // Trả về toàn bộ nếu chọn "Tất cả"
+  }
+  // Chỉ trả về những sản phẩm có category trùng với nút đang chọn
+  return products.value.filter((p) => p.category === selectedCategory.value)
+})
 </script>
 
 <template>
@@ -88,10 +98,22 @@ onMounted(async () => {
       </p>
     </div>
 
+    <div class="flex gap-4 mb-6">
+      <button
+        v-for="cat in categories"
+        :key="cat"
+        @click="selectedCategory = cat"
+        :class="selectedCategory === cat ? 'bg-green-600 text-white' : 'bg-gray-200'"
+        class="cursor-pointer px-4 py-2 rounded-lg font-bold transition-all"
+      >
+        {{ cat }}
+      </button>
+    </div>
+
     <div class="flex flex-col lg:flex-row gap-8">
       <div class="flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <ProductCard
-          v-for="p in products"
+          v-for="p in filteredProducts"
           :key="p.id"
           :product="p"
           @add-to-cart="handleAddToCart"

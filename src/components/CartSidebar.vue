@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { useCartStore } from '../stores/cart'
+import { useCartStore } from '@/stores/cart'
 import { useToast } from 'vue-toastification'
 
 const cart = useCartStore()
@@ -23,7 +23,7 @@ const goToCheckout = () => {
   router.push('/checkout')
 }
 
-const handleAddMore = (item) => {
+const handleAddMore = (item: any) => {
   const result = cart.addToCart(item)
   if (!result.success) {
     toast.error(result.message, {
@@ -31,14 +31,13 @@ const handleAddMore = (item) => {
     })
   }
 }
-
 </script>
 
 <template>
-  <div v-if="isOpen" @click="$emit('close')" class="fixed inset-0 bg-black/50 z-[60]"></div>
+  <div v-if="isOpen" @click="$emit('close')" class="fixed inset-0 bg-black/50 z-60"></div>
 
   <div
-    class="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-[70] transition-transform duration-300 transform"
+    class="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-70 transition-transform duration-300 transform"
     :class="isOpen ? 'translate-x-0' : 'translate-x-full'"
   >
     <div class="p-6 h-full flex flex-col">
@@ -71,7 +70,7 @@ const handleAddMore = (item) => {
             >
               −
             </button>
-            <span class="font-bold text-sm min-w-[15px] text-center">{{ item.quantity }}</span>
+            <span class="font-bold text-sm min-w-3.75 text-center">{{ item.quantity }}</span>
             <button
               @click="handleAddMore(item)"
               class="text-gray-400 hover:text-red-600 font-bold w-4"

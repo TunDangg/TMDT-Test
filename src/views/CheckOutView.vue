@@ -1,11 +1,49 @@
 <script setup lang="ts">
-import { useCartStore } from '../stores/cart'
+import { onMounted, ref } from 'vue'
+import { useCartStore } from '@/stores/cart'
+import { useToast } from 'vue-toastification'
+import { useRouter } from 'vue-router'
+
 const cart = useCartStore()
+const toast = useToast()
+const router = useRouter()
+const isValidating = ref(false)
+
+onMounted(async () => {
+  isValidating.value = true
+
+  // Validate cart items với backend
+  const invalidItems = await cart.validateCartItems()
+
+  if (invalidItems.length > 0) {
+    // Hiển thị thông báo cho từng sản phẩm có vấn đề
+    invalidItems.forEach(({ product, reason }) => {
+      toast.error(`${product.name}: ${reason}`, {
+        timeout: 5000,
+      })
+    })
+
+    // Redirect về trang home sau 3 giây
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+
+  isValidating.value = false
+})
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 py-12 px-4">
+    <!-- Loading State -->
+    <div v-if="isValidating" class="max-w-4xl mx-auto text-center py-20">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <p class="mt-4 text-gray-600">Đang kiểm tra giỏ hàng...</p>
+    </div>
+
+    <!-- Checkout Form -->
     <div
+      v-else
       class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-green-500"
     >
       <div class="p-8">

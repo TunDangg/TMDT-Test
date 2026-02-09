@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { Products } from '@/types'
-import { CartItem } from '@/types'
 
 const CART_STORAGE_KEY = 'shopping-cart'
 
@@ -41,7 +40,7 @@ export const useCartStore = defineStore('cart', {
     },
   },
   actions: {
-    addToCart(product) {
+    addToCart(product: any) {
       const existingItem = this.items.find((item) => item.id === product.id)
 
       if (existingItem) {
@@ -61,7 +60,7 @@ export const useCartStore = defineStore('cart', {
       saveCartToStorage(this.items)
       return { success: true, message: 'Thêm vào giỏ hàng thành công!' }
     },
-    removeFromCart(productId) {
+    removeFromCart(productId: any) {
       const item = this.items.find((i) => i.id === productId)
       if (item && item.quantity > 1) {
         item.quantity--
@@ -71,7 +70,7 @@ export const useCartStore = defineStore('cart', {
       saveCartToStorage(this.items)
     },
 
-    deleteItem(productId) {
+    deleteItem(productId: any) {
       this.items = this.items.filter((i) => i.id !== productId)
       saveCartToStorage(this.items)
     },
@@ -79,6 +78,49 @@ export const useCartStore = defineStore('cart', {
     clearCart() {
       this.items = []
       saveCartToStorage(this.items)
+    },
+
+    // Validate cart items với backend
+    async validateCartItems() {
+      const invalidItems: { product: Products; reason: string }[] = []
+
+      for (const item of this.items) {
+        try {
+          const response = await fetch(`http://localhost:3000/products/${item.id}`)
+          if (!response.ok) {
+            invalidItems.push({
+              product: item,
+              reason: 'Sản phẩm không còn tồn tại'
+            })
+            continue
+          }
+
+          const productData = await response.json()
+
+          // Kiểm tra nếu sản phẩm hết hàng
+          if (productData.stock_quantity <= 0) {
+            invalidItems.push({
+              product: item,
+              reason: 'Sản phẩm đã hết hàng'
+            })
+          }
+          // Kiểm tra nếu số lượng trong giỏ vượt quá số lượng trong kho
+          else if (item.quantity > productData.stock_quantity) {
+            invalidItems.push({
+              product: item,
+              reason: `Chỉ còn ${productData.stock_quantity} sản phẩm trong kho`
+            })
+          }
+        } catch (error) {
+          console.error('Lỗi khi validate sản phẩm:', error)
+          invalidItems.push({
+            product: item,
+            reason: 'Không thể kiểm tra sản phẩm'
+          })
+        }
+      }
+
+      return invalidItems
     },
   },
 })

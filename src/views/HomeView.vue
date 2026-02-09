@@ -39,7 +39,7 @@ const fetchProducts = async () => {
 }
 
 // Hàm xử lý khi người dùng nhấn nút "Thêm vào giỏ"
-const handleAddToCart = (product) => {
+const handleAddToCart = (product: any) => {
   const result = cart.addToCart(product) // Gọi hàm thêm sản phẩm trong store giỏ hàng
 
   if (result.success) {

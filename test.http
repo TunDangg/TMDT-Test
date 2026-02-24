@@ -1,0 +1,30 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### Test Đăng ký
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "tuandang_test",
+  "password": "123"
+}
+
+### Test Đăng nhập thành công
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "tuandang",
+  "password": "123"
+}
+
+### Test Đăng nhập sai mật khẩu (để xem báo lỗi)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "tuandang",
+  "password": "sai-mat-khau"
+}

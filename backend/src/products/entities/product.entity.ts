@@ -1,5 +1,5 @@
 // định nghĩa cấu trúc bảng trong database
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 @Entity('products')
 export class Product {
@@ -12,7 +12,7 @@ export class Product {
   @Column('int')
   price: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   description: string;
 
   @Column({ default: 0 })
@@ -21,6 +21,9 @@ export class Product {
   @Column({ nullable: true })
   category: string;
 
-  @Column({ nullable: true, type: 'text' })
+  @Column({ nullable: true, length: '500' })
   image_url: string;
+
+  @CreateDateColumn({ type: 'timestamp' }) // Tự động lưu thời gian tạo khi bản ghi được tạo
+  created_at: Date;
 }

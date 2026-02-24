@@ -3,30 +3,37 @@
 // ref: Tạo biến phản ứng (đổi giá trị là giao diện đổi theo).
 // onMounted: Chạy code ngay sau khi trang web hiển thị xong.
 // watch: Theo dõi một biến, nếu biến đó đổi thì chạy một hành động nào đó.
-import { ref, onMounted, watch } from 'vue' // Import các hàm cốt lõi của Vue 3
-import ProductCard from '../components/ProductCard.vue' // Import component thẻ sản phẩm để hiển thị
-import { useCartStore } from '../stores/cart' // Import kho quản lý giỏ hàng (Pinia)
-import { useSearchStore } from '../stores/search' // Import kho quản lý tìm kiếm (Pinia)
+import { ref, onMounted, watch, computed } from 'vue' // Import các hàm cốt lõi của Vue 3
 import axios from 'axios' // Thư viện để gọi API (lấy dữ liệu từ server)
+import ProductCard from '../components/ProductCard.vue' // Import component thẻ sản phẩm để hiển thị
+import { useCartStore } from '@/stores/cart' // Import kho quản lý giỏ hàng (Pinia)
+import { useSearchStore } from '@/stores/search' // Import kho quản lý tìm kiếm (Pinia)
 import { useToast } from 'vue-toastification' // Thư viện hiển thị thông báo "pop-up" nhanh
-import { computed } from 'vue'
+import { Products } from '@/types' // Import kiểu dữ liệu Product
 
-import type { Products } from '@/types' // Import kiểu dữ liệu Product
+/* --- ĐỊNH NGHĨA TYPES --- */
+interface BackendInfo {
+  message: string
+  user: string
+  role: string
+}
 
 /* --- KHỞI TẠO CÁC BIẾN VÀ KHO LƯU TRỮ --- */
 const cart = useCartStore() // Kích hoạt kho giỏ hàng Pinia.
 const products = ref<Products[]>([]) // Tạo mảng rỗng để chứa danh sách sản phẩm lấy từ API.
-const backendInfo = ref(null) // Biến chứa thông tin từ server
+const backendInfo = ref<BackendInfo | null>(null) // Biến chứa thông tin từ server
 const searchStore = useSearchStore() // Kết nối với kho chứa từ khóa tìm kiếm.
 const toast = useToast() // Tạo biến 'toast' để gọi lệnh hiện thông báo
 
 const selectedCategory = ref('Tất cả') // Mặc định hiển thị tất cả sản phẩm
 const categories = ['Tất cả', 'Thức ăn', 'Đồ uống', 'Ăn vặt'] // Danh sách các nút sẽ hiển thị
+const isLoading = ref(true)
 
 /* --- CÁC HÀM XỬ LÝ LOGIC --- */
 
 // Hàm gọi API để lấy danh sách sản phẩm
 const fetchProducts = async () => {
+  isLoading.value = true
   try {
     // Gửi yêu cầu GET đến server NestJS, kèm theo tham số tìm kiếm (search)
     const resProducts = await axios.get<Products[]>('http://localhost:3000/products', {
@@ -35,6 +42,8 @@ const fetchProducts = async () => {
     products.value = resProducts.data // Gán dữ liệu nhận được từ server vào biến products
   } catch (error) {
     console.error('Lỗi khi tải sản phẩm:', error) // Báo lỗi nếu server không phản hồi
+  } finally {
+    isLoading.value = false // Dù thành công hay lỗi, vẫn tắt trạng thái loading
   }
 }
 
@@ -71,12 +80,13 @@ onMounted(async () => {
     backendInfo.value = resInfo.data
 
     // 2. Sau đó gọi hàm lấy danh sách sản phẩm để hiển thị lên màn hình
-    fetchProducts()
+    await fetchProducts()
   } catch (error) {
     console.error('Lỗi kết nối Backend:', error)
   }
 })
 
+// Lọc sản phẩm theo category được chọn
 const filteredProducts = computed(() => {
   if (selectedCategory.value === 'Tất cả') {
     return products.value // Trả về toàn bộ nếu chọn "Tất cả"
@@ -84,6 +94,8 @@ const filteredProducts = computed(() => {
   // Chỉ trả về những sản phẩm có category trùng với nút đang chọn
   return products.value.filter((p) => p.category === selectedCategory.value)
 })
+
+
 </script>
 
 <template>
@@ -111,7 +123,7 @@ const filteredProducts = computed(() => {
     </div>
 
     <div class="flex flex-col lg:flex-row gap-8">
-      <div class="flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div class="grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <ProductCard
           v-for="p in filteredProducts"
           :key="p.id"

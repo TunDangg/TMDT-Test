@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useCartStore } from './stores/cart'
 import CartSidebar from './components/CartSidebar.vue'
 import { useSearchStore } from './stores/search'
+import { useToast } from 'vue-toastification'
 
 const searchStore = useSearchStore()
 const cart = useCartStore()
 const isCartOpen = ref<boolean>(false)
-
 const username = ref<string | null>(null)
+const router = useRouter()
+const toast = useToast()
 
 onMounted(() => {
   username.value = localStorage.getItem('username')
@@ -19,8 +21,8 @@ const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('username')
   username.value = null
-  alert('Đăng xuất thành công!')
-  window.location.reload() // Tải lại trang để cập nhật giao diện
+  toast.success('Đăng xuất thành công!', { timeout: 2000 })
+  router.push('/')
 }
 </script>
 
@@ -44,15 +46,27 @@ const logout = () => {
       </div>
 
       <div class="flex items-center gap-6 font-medium text-gray-600">
-        <div v-if="username" class="flex items-center gap-3">
-          <span class="text-orange-600"
-            >Chào mừng bạn, <b>{{ username }}</b></span
+        <div v-if="username" class="flex items-center gap-4">
+          <div class="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-green-700 font-semibold">{{ username }}</span>
+          </div>
+          <button
+            @click="logout"
+            class="flex items-center gap-1 bg-red-50 text-red-600 px-3 py-1.5 rounded-full hover:bg-red-100 transition-all font-semibold "
           >
-          <button @click="logout" class="text-xs text-red-500 hover:underline">Đăng Xuất</button>
+            Đăng Xuất
+          </button>
         </div>
-        <RouterLink to="/login" class="hover:font-bold hover:scale-110 transition-all"
-          >Đăng Nhập</RouterLink
+        <RouterLink
+          v-else
+          to="/login"
+          class="flex items-center gap-2 bg-orange-50 text-orange-600 px-3 py-1.5 rounded-full hover:bg-orange-100 transition-all font-semibold "
         >
+          Đăng Nhập
+        </RouterLink>
 
         <div
           @click="isCartOpen = true"

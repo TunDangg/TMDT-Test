@@ -40,19 +40,39 @@
 import { ref } from 'vue'
 import api from '../services/api'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 
 const username = ref('')
 const password = ref('')
 const router = useRouter()
+const toast = useToast()
 
 const handleRegister = async () => {
   try {
-    await api.post('/auth/register', { username: username.value, password: password.value })
-    alert('Đăng ký thành công! Hãy đăng nhập.')
-    router.push('/login')
+    // Đăng ký tài khoản
+    await api.post('/auth/register', {
+      username: username.value,
+      password: password.value
+    })
+
+    // Tự động đăng nhập sau khi đăng ký thành công
+    try {
+      const loginResponse = await api.post('/auth/login', {
+        username: username.value,
+        password: password.value,
+      })
+      localStorage.setItem('token', loginResponse.data.access_token)
+      localStorage.setItem('username', username.value)
+      toast.success('Đăng ký và đăng nhập thành công!', { timeout: 2000 })
+      router.push('/')
+      setTimeout(() => window.location.reload(), 100)
+    } catch (loginError) {
+      toast.info('Đăng ký thành công! Vui lòng đăng nhập.', { timeout: 2000 })
+      router.push('/login')
+    }
   } catch (err) {
     console.error('Register error:', err)
-    alert('Người dùng đã tổn tại!')
+    toast.error('Tên người dùng đã tồn tại!', { timeout: 3000 })
   }
 }
 </script>

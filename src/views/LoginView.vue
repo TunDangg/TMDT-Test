@@ -40,10 +40,12 @@
 import { ref } from 'vue'
 import api from '../services/api'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 
 const username = ref('')
 const password = ref('')
 const router = useRouter()
+const toast = useToast()
 
 const handleLogin = async () => {
   try {
@@ -52,11 +54,12 @@ const handleLogin = async () => {
       password: password.value,
     })
     localStorage.setItem('token', response.data.access_token) // Lưu JWT vào localStorage
-    localStorage.setItem('user', JSON.stringify({ username: username.value }))
-    alert('Đăng nhập thành công!')
+    localStorage.setItem('username', username.value) // Lưu username để hiển thị
+    toast.success(`Chào mừng ${username.value}!`, { timeout: 2000 })
     router.push('/')
-  } catch (error) {
-    alert('Sai tài khoản hoặc mật khẩu!')
+    setTimeout(() => window.location.reload(), 100) // Tải lại để cập nhật header
+  } catch {
+    toast.error('Sai tên đăng nhập hoặc mật khẩu!', { timeout: 3000 })
   }
 }
 </script>

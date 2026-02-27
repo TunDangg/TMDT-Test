@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { useCartStore } from './stores/cart'
 import CartSidebar from './components/CartSidebar.vue'
@@ -9,13 +9,28 @@ const searchStore = useSearchStore()
 const cart = useCartStore()
 const isCartOpen = ref<boolean>(false)
 
+const username = ref<string | null>(null)
+
+onMounted(() => {
+  username.value = localStorage.getItem('username')
+})
+
+const logout = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('username')
+  username.value = null
+  alert('Đăng xuất thành công!')
+  window.location.reload() // Tải lại trang để cập nhật giao diện
+}
 </script>
 
 <template>
   <header class="bg-white shadow-md sticky top-0 z-50">
     <nav class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-2 shrink-0">
-        <h1 class="font-bold text-xl text-orange-600">EDTEXCO Fast Food Store</h1>
+        <RouterLink to="/" class="cursor-pointer hover:opacity-80 transition-opacity">
+          <h1 class="font-bold text-xl text-orange-600">EDTEXCO Fast Food Store</h1>
+        </RouterLink>
       </div>
 
       <div class="flex-grow max-w-xl relative">
@@ -29,7 +44,13 @@ const isCartOpen = ref<boolean>(false)
       </div>
 
       <div class="flex items-center gap-6 font-medium text-gray-600">
-        <RouterLink to="/" class="hover:font-bold hover:scale-110 transition-all"
+        <div v-if="username" class="flex items-center gap-3">
+          <span class="text-orange-600"
+            >Chào mừng bạn, <b>{{ username }}</b></span
+          >
+          <button @click="logout" class="text-xs text-red-500 hover:underline">Đăng Xuất</button>
+        </div>
+        <RouterLink to="/login" class="hover:font-bold hover:scale-110 transition-all"
           >Đăng Nhập</RouterLink
         >
 

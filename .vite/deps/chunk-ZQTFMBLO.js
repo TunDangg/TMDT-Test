@@ -2173,7 +2173,7 @@ function warn$1(msg, ...args) {
       instance,
       11,
       [
-        // eslint-disable-next-line no-restricted-syntax
+         
         msg + args.map((a) => {
           var _a, _b;
           return (_b = (_a = a.toString) == null ? void 0 : _a.call(a)) != null ? _b : JSON.stringify(a);
@@ -2735,7 +2735,7 @@ function setDevtoolsHook$1(hook, target) {
     // (#4815)
     typeof window !== "undefined" && // some envs mock window but not fully
     window.HTMLElement && // also exclude jsdom
-    // eslint-disable-next-line no-restricted-syntax
+     
     !((_b = (_a = window.navigator) == null ? void 0 : _a.userAgent) == null ? void 0 : _b.includes("jsdom"))
   ) {
     const replay = target.__VUE_DEVTOOLS_HOOK_REPLAY__ = target.__VUE_DEVTOOLS_HOOK_REPLAY__ || [];
@@ -7700,7 +7700,7 @@ function baseCreateRenderer(options, createHydrationFns) {
         optimized
       );
     } else {
-      const customElement = !!(n1.el && n1.el._isVueCE) ? n1.el : null;
+      const customElement = n1.el && n1.el._isVueCE ? n1.el : null;
       try {
         if (customElement) {
           customElement._beginPatch();
@@ -9545,7 +9545,7 @@ function hydrateSuspense(node, vnode, parentComponent, parentSuspense, namespace
     parentSuspense,
     parentComponent,
     node.parentNode,
-    // eslint-disable-next-line no-restricted-globals
+     
     document.createElement("div"),
     null,
     namespace,

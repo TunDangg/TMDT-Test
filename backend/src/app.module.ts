@@ -9,7 +9,8 @@ import { AppService } from './app.service';
 import { User } from './users/entities/user.entity'; // import entity User vào đây để TypeOrm biết
 import { Product } from './products/entities/product.entity'; // import entity Product vào đây để TypeOrm biết
 import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module'; // import module User vào đây để nest biết
+import { AuthModule } from './auth/auth.module';
+import { CartItem } from './cart/entities/cart-item.entity'; // import module User vào đây để nest biết
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { AuthModule } from './auth/auth.module'; // import module User vào đâ
       database: process.env.DB_DATABASE,
       autoLoadEntities: true, // Tự động nạp Product Entity ( chưa hiểu để làm gì )
       synchronize: true, // để false vì đã đã tạo bảng trong DataGrip rồi
-      entities: [Product, User], // Đăng ký các entity với TypeOrm
+      entities: [Product, User, CartItem], // Đăng ký các entity với TypeOrm
     }),
     UsersModule,
     ProductsModule, // module này ở đây để nest biết có chức năng qly spham

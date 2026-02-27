@@ -9,6 +9,8 @@ const toast = useToast()
 const router = useRouter()
 const isValidating = ref(false)
 const isShowQR = ref(false)
+const userId = 1; // Giả sử userId là 1, bạn có thể thay đổi tùy theo logic đăng nhập của bạn
+const infoKey = `customer_info_${userId}` // Key riêng cho từng user để tránh ghi đè thông tin
 
 const Payment_Info = {
   BANK_ID: 'MB',
@@ -60,13 +62,14 @@ watch(
 
 onMounted(async () => {
   //2. LocalStorage
-  const savedInfo = localStorage.getItem('customer_info')
+  const savedInfo = localStorage.getItem(infoKey)
   if (savedInfo) {
     try {
       form.value = JSON.parse(savedInfo) // Load thông tin đã lưu vào form
     } catch (error) {
       console.error('Lỗi khi tải thông tin khách hàng:', error)
     }
+    await cart.fetchCart(); // Đảm bảo đã có dữ liệu giỏ hàng tu database trước khi validate
   }
 
   isValidating.value = true

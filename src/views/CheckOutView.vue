@@ -61,37 +61,59 @@ watch(
 )
 
 onMounted(async () => {
-  //2. LocalStorage
+  // Load thông tin khách hàng đã lưu từ localStorage
   const savedInfo = localStorage.getItem(infoKey)
   if (savedInfo) {
     try {
-      form.value = JSON.parse(savedInfo) // Load thông tin đã lưu vào form
+      form.value = JSON.parse(savedInfo)
     } catch (error) {
       console.error('Lỗi khi tải thông tin khách hàng:', error)
     }
-    await cart.fetchCart(); // Đảm bảo đã có dữ liệu giỏ hàng tu database trước khi validate
   }
 
+  // Bật trạng thái validating
   isValidating.value = true
 
-  // Validate cart items với backend
-  const invalidItems = await cart.validateCartItems()
+  try {
+    // Bước 1: Load giỏ hàng từ database
+    await cart.fetchCart()
 
-  if (invalidItems.length > 0) {
-    // Hiển thị thông báo cho từng sản phẩm có vấn đề
-    invalidItems.forEach(({ product, reason }) => {
-      toast.error(`${product.name}: ${reason}`, {
-        timeout: 5000,
+    // Bước 2: Kiểm tra giỏ hàng có rỗng không
+    if (cart.items.length === 0) {
+      toast.warning('Giỏ hàng của bạn đang trống', { timeout: 3000 })
+      setTimeout(() => {
+        router.push('/')
+      }, 2000)
+      return
+    }
+
+    // Bước 3: Validate từng sản phẩm trong giỏ hàng (kiểm tra tồn kho)
+    const invalidItems = await cart.validateCartItems()
+
+    if (invalidItems.length > 0) {
+      // Hiển thị thông báo cho từng sản phẩm có vấn đề
+      invalidItems.forEach(({ product, reason }) => {
+        toast.error(`${product.name}: ${reason}`, {
+          timeout: 5000,
+        })
       })
-    })
 
-    // Redirect về trang home sau 3 giây
+      // Redirect về trang home sau 3 giây
+      setTimeout(() => {
+        router.push('')
+      }, 3000)
+    }
+  } catch (error) {
+    console.error('Lỗi khi validate giỏ hàng:', error)
+    toast.error('Không thể kiểm tra giỏ hàng. Vui lòng thử lại!', { timeout: 3000 })
     setTimeout(() => {
       router.push('/')
-    }, 3000)
+    }, 2000)
+  } finally {
+    // QUAN TRỌNG: Tắt trạng thái validating trong mọi trường hợp
+    // Đây là lý do chính trang không bị treo - finally luôn chạy!
+    isValidating.value = false
   }
-
-  isValidating.value = false
 })
 </script>
 

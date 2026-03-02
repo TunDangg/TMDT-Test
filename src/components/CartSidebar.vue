@@ -23,8 +23,8 @@ const goToCheckout = () => {
   router.push('/checkout')
 }
 
-const handleAddMore = (item: any) => {
-  const result = cart.addToCart(item)
+const handleAddMore = async (item: any) => {
+  const result = await cart.addToCart(item)
   if (!result.success) {
     toast.error(result.message, {
       timeout: 3000,
@@ -47,14 +47,27 @@ const handleAddMore = (item: any) => {
       </div>
 
       <div class="flex-grow overflow-y-auto space-y-4">
+        <!-- Empty state -->
+        <div v-if="!cart.items || cart.items.length === 0" class="text-center py-12">
+          <p class="text-gray-500 mb-4">Giỏ hàng trống</p>
+          <button
+            @click="$emit('close')"
+            class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600"
+          >
+            Tiếp tục mua sắm
+          </button>
+        </div>
+
+        <!-- Cart items với safe guards -->
         <div
+          v-else
           v-for="item in cart.items"
           :key="item.id"
           class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100"
         >
           <div class="flex-grow">
-            <p class="font-bold text-gray-800">{{ item.name }}</p>
-            <p class="text-xs text-orange-600 font-medium">{{ item.price.toLocaleString() }}đ</p>
+            <p class="font-bold text-gray-800">{{ item.name || 'Sản phẩm' }}</p>
+            <p class="text-xs text-orange-600 font-medium">{{ (item.price || 0).toLocaleString() }}đ</p>
             <button
               @click="cart.deleteItem(item.id)"
               class="text-[11px] text-gray-400 hover:text-red-500 uppercase mt-1 transition"
@@ -70,7 +83,7 @@ const handleAddMore = (item: any) => {
             >
               −
             </button>
-            <span class="font-bold text-sm min-w-3.75 text-center">{{ item.quantity }}</span>
+            <span class="font-bold text-sm min-w-3.75 text-center">{{ item.quantity || 0 }}</span>
             <button
               @click="handleAddMore(item)"
               class="text-gray-400 hover:text-red-600 font-bold w-4"
@@ -81,10 +94,10 @@ const handleAddMore = (item: any) => {
         </div>
       </div>
 
-      <div class="border-t pt-6 mt-4">
+      <div v-if="cart.items && cart.items.length > 0" class="border-t pt-6 mt-4">
         <div class="flex justify-between text-lg font-bold mb-4">
           <span class="text-gray-600">Tổng cộng:</span>
-          <span class="text-red-600">{{ cart.totalPrice.toLocaleString() }}đ</span>
+          <span class="text-red-600">{{ (cart.totalPrice || 0).toLocaleString() }}đ</span>
         </div>
         <button
           @click="goToCheckout"

@@ -17,7 +17,7 @@ export class CartService {
   async getCartItem(userId: number) {
     const items = await this.cartRepository.find({
       where: { userId },
-      relations: ['product'], // Lấy luôn thông tin sản phẩm liên quan
+      relations: ['product', 'user'], // Lấy luôn thông tin sản phẩm liên quan
     });
 
     // Map và ensure data integrity

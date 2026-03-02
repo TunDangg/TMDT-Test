@@ -16,7 +16,14 @@ export const useCartStore = defineStore('cart', {
     async fetchCart() {
       this.isLoading = true
       try {
-        const response = await fetch('http://localhost:3000/cart')
+        const userId = localStorage.getItem('userId')
+        if (!userId) {
+          // Chưa đăng nhập, giỏ hàng rỗng
+          this.items = []
+          return
+        }
+
+        const response = await fetch(`http://localhost:3000/cart?userId=${userId}`)
         if (response.ok) {
           this.items = await response.json()
         } else {
@@ -34,10 +41,15 @@ export const useCartStore = defineStore('cart', {
     // 2. Thêm vào giỏ hàng (Lưu trực tiếp vào MySQL)
     async addToCart(product: Products, quantity = 1) {
       try {
+        const userId = localStorage.getItem('userId')
+        if (!userId) {
+          return { success: false, message: 'Vui lòng đăng nhập để thêm vào giỏ hàng' }
+        }
+
         const response = await fetch('http://localhost:3000/cart/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: product.id, quantity }),
+          body: JSON.stringify({ userId: Number(userId), productId: product.id, quantity }),
         })
 
         const result = await response.json()
@@ -55,7 +67,10 @@ export const useCartStore = defineStore('cart', {
     // 3. Xóa sản phẩm khỏi giỏ hàng trên Database
     async deleteItem(productId: number) {
       try {
-        const response = await fetch(`http://localhost:3000/cart/${productId}`, {
+        const userId = localStorage.getItem('userId')
+        if (!userId) return
+
+        const response = await fetch(`http://localhost:3000/cart/${productId}?userId=${userId}`, {
           method: 'DELETE',
         })
         if (response.ok) {
@@ -83,7 +98,10 @@ export const useCartStore = defineStore('cart', {
     // 4. Xóa sạch giỏ hàng (ví dụ sau khi thanh toán xong)
     async clearCart() {
       try {
-        await fetch('http://localhost:3000/cart', { method: 'DELETE' })
+        const userId = localStorage.getItem('userId')
+        if (!userId) return
+
+        await fetch(`http://localhost:3000/cart?userId=${userId}`, { method: 'DELETE' })
         this.items = []
       } catch (error) {
         console.error('Lỗi khi làm trống giỏ hàng:', error)

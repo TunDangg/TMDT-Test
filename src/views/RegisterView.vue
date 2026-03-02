@@ -63,6 +63,7 @@ const handleRegister = async () => {
       })
       localStorage.setItem('token', loginResponse.data.access_token)
       localStorage.setItem('username', username.value)
+      localStorage.setItem('userId', loginResponse.data.user.id) // Lưu userId
       toast.success('Đăng ký và đăng nhập thành công!', { timeout: 2000 })
       router.push('/')
       setTimeout(() => window.location.reload(), 100)

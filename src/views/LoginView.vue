@@ -55,6 +55,7 @@ const handleLogin = async () => {
     })
     localStorage.setItem('token', response.data.access_token) // Lưu JWT vào localStorage
     localStorage.setItem('username', username.value) // Lưu username để hiển thị
+    localStorage.setItem('userId', response.data.user.id) // Lưu userId để phân biệt giỏ hàng
     toast.success(`Chào mừng ${username.value}!`, { timeout: 2000 })
     router.push('/')
     setTimeout(() => window.location.reload(), 100) // Tải lại để cập nhật header

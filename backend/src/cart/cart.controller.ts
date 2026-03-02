@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Delete, Param, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  Param,
+  HttpException,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
 
 @Controller('cart') // route goc la http://localhost:3000/cart
@@ -6,10 +16,13 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get()
-  async getCart() {
+  async getCart(@Query('userId') userId: string) {
     try {
-      return await this.cartService.getCartItem();
-    } catch (error) {
+      if (!userId) {
+        throw new HttpException('userId là bắt buộc', HttpStatus.BAD_REQUEST);
+      }
+      return await this.cartService.getCartItem(Number(userId));
+    } catch (error: any) {
       throw new HttpException(
         error.message || 'Lỗi khi lấy giỏ hàng',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -18,18 +31,18 @@ export class CartController {
   }
 
   @Post('add')
-  async addToCart(@Body() body: { productId: number; quantity: number }) {
+  async addToCart(@Body() body: { userId: number; productId: number; quantity: number }) {
     try {
       // Validate input
-      if (!body.productId || body.quantity === undefined) {
+      if (!body.userId || !body.productId || body.quantity === undefined) {
         throw new HttpException(
-          'productId và quantity là bắt buộc',
+          'userId, productId và quantity là bắt buộc',
           HttpStatus.BAD_REQUEST,
         );
       }
 
-      return await this.cartService.addToCart(body.productId, body.quantity);
-    } catch (error) {
+      return await this.cartService.addToCart(body.userId, body.productId, body.quantity);
+    } catch (error: any) {
       // If it's already an HttpException, rethrow it
       if (error.status) {
         throw error;
@@ -43,10 +56,16 @@ export class CartController {
   }
 
   @Delete(':productId') // nhap id san pham can xoa
-  async removeCartItem(@Param('productId') productId: number) {
+  async removeCartItem(
+    @Param('productId') productId: string,
+    @Query('userId') userId: string,
+  ) {
     try {
-      return await this.cartService.removeCartItem(Number(productId));
-    } catch (error) {
+      if (!userId) {
+        throw new HttpException('userId là bắt buộc', HttpStatus.BAD_REQUEST);
+      }
+      return await this.cartService.removeCartItem(Number(userId), Number(productId));
+    } catch (error: any) {
       throw new HttpException(
         error.message || 'Lỗi khi xóa sản phẩm',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -55,10 +74,13 @@ export class CartController {
   }
 
   @Delete()
-  async clearCart() {
+  async clearCart(@Query('userId') userId: string) {
     try {
-      return await this.cartService.clearCart();
-    } catch (error) {
+      if (!userId) {
+        throw new HttpException('userId là bắt buộc', HttpStatus.BAD_REQUEST);
+      }
+      return await this.cartService.clearCart(Number(userId));
+    } catch (error: any) {
       throw new HttpException(
         error.message || 'Lỗi khi xóa giỏ hàng',
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -22,7 +22,9 @@ onMounted(async () => {
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('username')
+  localStorage.removeItem('userId')
   username.value = null
+  cart.items = [] // Clear giỏ hàng local
   toast.success('Đăng xuất thành công!', { timeout: 2000 })
   router.push('/')
 }

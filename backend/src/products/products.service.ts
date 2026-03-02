@@ -1,8 +1,6 @@
-// File Service này là nơi bạn viết mọi logic "thông minh" cho ứng dụng
-// hoạt động dựa trên file entity
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm'; // Repository chứa các hàm có sẵn find, save, delete để thao tác với bảng database
+import { Repository } from 'typeorm'; // Repository chứa các hàm có sẵn find, save, delete để thao tác với bảng database
 import { Product } from './entities/product.entity'; // Đảm bảo đường dẫn này đúng
 import { CreateProductDto } from './dto/create-product.dto'; // DTO kiểm soát dữ liệu đầu vào
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,13 +12,18 @@ export class ProductsService {
     private productsRepository: Repository<Product>,
   ) {}
 
-  // Lấy dữ liệu từ MySQL
+  // Lấy dữ liệu từ MySQL với tính năng tìm kiếm
   async findAll(search?: string): Promise<Product[]> {
-    if (search) {
-      return await this.productsRepository.find({
-        where: { name: Like(`%${search}%`) },
-      });
+    if (search && search.trim()) {
+      // Tìm kiếm trong cả tên và mô tả sản phẩm (case-insensitive)
+      // Sử dụng LOWER() để tìm kiếm không phân biệt hoa thường
+      return await this.productsRepository
+        .createQueryBuilder('product')
+        .where('LOWER(product.name) LIKE LOWER(:search)', { search: `%${search}%` })
+        .orWhere('LOWER(product.description) LIKE LOWER(:search)', { search: `%${search}%` })
+        .getMany();
     }
+    // Nếu không có search query, trả về tất cả sản phẩm
     return await this.productsRepository.find();
   }
 

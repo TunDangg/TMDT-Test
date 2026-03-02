@@ -11,6 +11,7 @@ import { Product } from './products/entities/product.entity'; // import entity P
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CartItem } from './cart/entities/cart-item.entity'; // import module User vào đây để nest biết
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CartItem } from './cart/entities/cart-item.entity'; // import module Us
     UsersModule,
     ProductsModule, // module này ở đây để nest biết có chức năng qly spham
     AuthModule, // module này ở đây để nest biết có chức năng xác thực ng dùng
+    CartModule, // module này ở đây để nest biết có chức năng xác thực ng dùng
   ],
   controllers: [AppController],
   providers: [AppService],

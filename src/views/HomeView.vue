@@ -35,21 +35,21 @@ const isLoading = ref(true)
 const fetchProducts = async () => {
   isLoading.value = true
   try {
-    // Gửi yêu cầu GET đến server NestJS, kèm theo tham số tìm kiếm (search)
-    const resProducts = await axios.get<Products[]>('http://localhost:3000/products', {
-      params: { search: searchStore.searchQuery },
-    })
+    // Lấy tất cả sản phẩm từ server (không filter ở backend nữa)
+    // Frontend sẽ tự filter theo search query và category
+    const resProducts = await axios.get<Products[]>('http://localhost:3000/products')
     products.value = resProducts.data // Gán dữ liệu nhận được từ server vào biến products
   } catch (error) {
     console.error('Lỗi khi tải sản phẩm:', error) // Báo lỗi nếu server không phản hồi
+    toast.error('Không thể tải danh sách sản phẩm', { timeout: 3000 })
   } finally {
     isLoading.value = false // Dù thành công hay lỗi, vẫn tắt trạng thái loading
   }
 }
 
 // Hàm xử lý khi người dùng nhấn nút "Thêm vào giỏ"
-const handleAddToCart = (product: any ) => {
-  const result = cart.addToCart(product) // Gọi hàm thêm sản phẩm trong store giỏ hàng
+const handleAddToCart = async (product: Products) => {
+  const result = await cart.addToCart(product) // Gọi hàm thêm sản phẩm trong store giỏ hàng (await vì là async)
 
   if (result.success) {
     toast.success(result.message, {
@@ -64,11 +64,14 @@ const handleAddToCart = (product: any ) => {
   }
 }
 
-// 'watch' sẽ canh chừng ô tìm kiếm, người dùng gõ đến đâu - gọi API lấy sản phẩm đến đó
+// 'watch' theo dõi ô tìm kiếm - tự động reset category về "Tất cả" khi tìm kiếm
 watch(
   () => searchStore.searchQuery,
-  () => {
-    fetchProducts()
+  (newQuery) => {
+    // Nếu người dùng bắt đầu gõ tìm kiếm, reset về "Tất cả" để hiện đầy đủ kết quả
+    if (newQuery.trim() && selectedCategory.value !== 'Tất cả') {
+      selectedCategory.value = 'Tất cả'
+    }
   },
 )
 
@@ -88,11 +91,24 @@ onMounted(async () => {
 
 // Lọc sản phẩm theo category được chọn
 const filteredProducts = computed(() => {
-  if (selectedCategory.value === 'Tất cả') {
-    return products.value // Trả về toàn bộ nếu chọn "Tất cả"
+  let filtered = products.value
+
+  // Bước 1: Lọc theo category nếu không phải "Tất cả"
+  if (selectedCategory.value !== 'Tất cả') {
+    filtered = filtered.filter((p) => p.category === selectedCategory.value)
   }
-  // Chỉ trả về những sản phẩm có category trùng với nút đang chọn
-  return products.value.filter((p) => p.category === selectedCategory.value)
+
+  // Bước 2: Nếu có từ khóa tìm kiếm, lọc thêm ở frontend (để tăng trải nghiệm)
+  // Backend đã trả về kết quả tìm kiếm rồi, nhưng lọc thêm theo category
+  if (searchStore.searchQuery.trim()) {
+    const query = searchStore.searchQuery.toLowerCase()
+    filtered = filtered.filter((p) =>
+      p.name.toLowerCase().includes(query) ||
+      (p.description && p.description.toLowerCase().includes(query))
+    )
+  }
+
+  return filtered
 })
 
 
@@ -110,6 +126,19 @@ const filteredProducts = computed(() => {
       </p>
     </div>
 
+    <!-- Hiển thị thông tin tìm kiếm nếu đang search -->
+    <div v-if="searchStore.searchQuery.trim()" class="mb-4 flex items-center gap-3 bg-orange-50 p-3 rounded-lg">
+      <span class="text-gray-700">
+        Kết quả tìm kiếm cho: <strong class="text-orange-600">"{{ searchStore.searchQuery }}"</strong>
+      </span>
+      <button
+        @click="searchStore.searchQuery = ''"
+        class="ml-auto bg-orange-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-orange-600 transition"
+      >
+        ✕ Xóa tìm kiếm
+      </button>
+    </div>
+
     <div class="flex gap-4 mb-6">
       <button
         v-for="cat in categories"
@@ -122,7 +151,30 @@ const filteredProducts = computed(() => {
       </button>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Loading state -->
+    <div v-if="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      <p class="mt-4 text-gray-600">Đang tải sản phẩm...</p>
+    </div>
+
+    <!-- Không tìm thấy sản phẩm -->
+    <div v-else-if="filteredProducts.length === 0" class="text-center py-12 bg-gray-50 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-gray-600 text-lg font-medium">Không tìm thấy sản phẩm phù hợp</p>
+      <p class="text-gray-400 text-sm mt-2">Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác</p>
+      <button
+        v-if="searchStore.searchQuery.trim() || selectedCategory !== 'Tất cả'"
+        @click="searchStore.searchQuery = ''; selectedCategory = 'Tất cả'"
+        class="mt-4 bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition"
+      >
+        Xem tất cả sản phẩm
+      </button>
+    </div>
+
+    <!-- Danh sách sản phẩm -->
+    <div v-else class="flex flex-col lg:flex-row gap-8">
       <div class="grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <ProductCard
           v-for="p in filteredProducts"

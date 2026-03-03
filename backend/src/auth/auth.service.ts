@@ -32,13 +32,20 @@ export class AuthService {
     const { password: _, ...result } = user; // Loại bỏ trường password khỏi đối tượng user trả về
 
     // Tạo JWT token
-    const payload = { sub: user.id, username: user.username };
+    const payload = {
+      sub: user.id,
+      username: user.username,
+      role: user.role,
+    };
     const access_token = await this.jwtService.signAsync(payload);
 
     return {
       message: 'Đăng nhập thành công',
       access_token,
-      user: result,
+      user: {
+        ...result, // result dùng để trả về thông tin user đã loại bỏ password
+        role: user.role,
+      },
     };
   }
 }

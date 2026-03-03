@@ -1,5 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
+export enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
 @Entity('users') // Bảo TypeOrm tạo bảng tên 'users' trong tmdt_db
 export class User {
   @PrimaryGeneratedColumn() // Cột ID tự tăng
@@ -11,7 +16,11 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'user' }) // Phần quyền : mặc định đang là user
-  role: string;
+  @Column({
+    type: 'enum', // Kiểu enum để giới hạn giá trị role chỉ có 'user' hoặc 'admin'
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
 }

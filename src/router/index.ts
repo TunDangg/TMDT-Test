@@ -29,14 +29,32 @@ const router = createRouter({
       // Những trang cần đăng nhập mới được vào
       meta: { requiresAuth: true }, // Đánh dấu trang này cần xác thực
     },
-    // {
-    //   path: '/admin',
-    //   name: 'admin',
-    //   // Chua tao trang admin nên tạm thời để trống component, sau này sẽ tạo và import vào đây
-    //   component: () => import('../views/AdminView.vue'), // Lazy load trang admin
-    //   // Nhung trang phai la admin moi duoc vao
-    //   meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
-    // },
+    {
+      path: '/admin',
+      name: 'admin-dashboard',
+      // Chua tao trang admin nên tạm thời để trống component, sau này sẽ tạo và import vào đây
+      component: () => import('../views/AdminView.vue'), // Lazy load trang admin
+      // Nhung trang phai la admin moi duoc vao
+      meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
+    },
+    {
+      path: '/admin/leads',
+      name: 'admin-leads',
+      component: () => import('../views/LeadManagementView.vue'), // Lazy load trang admin leads
+      meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
+    },
+    {
+      path: '/admin/products',
+      name: 'admin-products',
+      component: () => import('../views/ProductManagementView.vue'), // Lazy load trang admin products
+      meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
+    },
+    {
+      path: '/admin/orders',
+      name: 'admin-orders',
+      component: () => import('../views/OrderManagementView.vue'), // Lazy load trang admin orders
+      meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
+    }
   ],
 })
 

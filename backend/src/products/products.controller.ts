@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  SetMetadata,
+  UseGuards
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto'; // DTO kiểm soát dữ liệu đầu vào
 import { UpdateProductDto } from './dto/update-product.dto';
+
+import { RolesGuard} from '../auth/roles.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -10,6 +23,8 @@ export class ProductsController {
   // thực hiện Dependency Injection (tiêm phụ thuộc) để kết nối các service hoặc repository vào controller
 
   @Post()
+  @SetMetadata('roles', ['admin']) // Chỉ cho phép admin mới có quyền tạo sản phẩm
+  @UseGuards(RolesGuard) // Sử dụng guard để kiểm tra quyền truy cập
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }

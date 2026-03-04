@@ -54,6 +54,7 @@ const handleLogin = async () => {
       password: password.value,
     })
     localStorage.setItem('token', response.data.access_token) // Lưu JWT vào localStorage
+    localStorage.setItem('role', response.data.user.role) // Lưu role để phân quyền
     localStorage.setItem('username', username.value) // Lưu username để hiển thị
     localStorage.setItem('userId', response.data.user.id) // Lưu userId để phân biệt giỏ hàng
     toast.success(`Chào mừng ${username.value}!`, { timeout: 2000 })

@@ -25,7 +25,7 @@ import { CartModule } from './cart/cart.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       autoLoadEntities: true, // Tự động nạp Product Entity ( chưa hiểu để làm gì )
-      synchronize: true, // để false vì đã đã tạo bảng trong DataGrip rồi
+      synchronize: false, // để false vì đã đã tạo bảng trong DataGrip rồi
       entities: [Product, User, CartItem], // Đăng ký các entity với TypeOrm
     }),
     UsersModule,

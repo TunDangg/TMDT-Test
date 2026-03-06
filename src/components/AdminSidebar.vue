@@ -13,7 +13,7 @@
         active-class="bg-pink-600 text-white"
       >
         <span>📊</span>
-        <span class="font-medium">Bảng điều khiển</span>
+        <span class="font-medium">DASHBOARD</span>
       </router-link>
 
       <router-link
@@ -37,6 +37,7 @@
       <router-link
         to="/admin/orders"
         class="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group"
+        active-class="bg-pink-600 text-white"
       >
         <span>📜</span>
         <span class="font-medium">Quản lý đơn hàng</span>

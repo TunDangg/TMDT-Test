@@ -1,29 +1,35 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import api from '@/services/api'
+import { Products } from '@/types'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 
+const searchQuery = ref('')
+
 // Dữ liệu sản phẩm (Giai đoạn sau sẽ dùng ref và gọi API)
-const products = ref([
-  {
-    id: 1,
-    name: 'Trà Sữa',
-    price: 25000,
-    description: 'Trà sữa truyền thống trân châu đen dai giòn.',
-    image_url:
-      'https://mixueviet.com/wp-content/uploads/2024/05/Tra-Sua-Tran-Chau-Duong-Den-Mixue.jpg',
-    stock_quantity: 50,
-    category: 'Đồ uống',
-  },
-  {
-    id: 2,
-    name: 'Gà Rán Cay',
-    price: 45000,
-    description: 'Gà rán giòn tan sốt cay nồng',
-    image_url: '',
-    stock_quantity: 20,
-    category: 'Món chính',
-  },
-])
+const products = ref<Products[]>([])
+
+const filteredProducts = computed(() => {
+  return products.value.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (item.description &&
+        item.description.toLowerCase().includes(searchQuery.value.toLowerCase())),
+  )
+})
+
+const fetchProducts = async () => {
+  try {
+    const response = await api.get('/products')
+    products.value = response.data
+  } catch (error) {
+    console.error('Lỗi khi lấy sản phẩm:', error)
+  }
+}
+
+onMounted(() => {
+  fetchProducts()
+})
 
 // Logic Modal Thêm Sản Phẩm (Đã làm ở bước trước)
 const newProduct = ref({
@@ -54,14 +60,16 @@ const closeProductModal = () => {
   }
 }
 
-const submitProduct = () => {
-  // Giai doan 1 : them tam thoi vao mang de test UI
-  const id = products.value.length + 1
-  products.value.unshift({ id, ...newProduct.value })
-
-  // Giai doan 2: sau nay se goi API tai day
-  // api.post('/products', newProduct.value)
-
+const submitProduct = async () => {
+  try {
+    // Gọi API để thêm sản phẩm mới
+    await api.post('/products', newProduct.value)
+    alert('Thêm sản phẩm thành công!')
+    // Sau khi thêm thành công, tải lại danh sách sản phẩm để cập nhật giao diện
+    await fetchProducts()
+  } catch (error) {
+    console.error('Lỗi khi thêm sản phẩm:', error)
+  }
   closeProductModal()
 }
 </script>
@@ -86,8 +94,9 @@ const submitProduct = () => {
         >
           <div class="flex items-center gap-2 flex-1 min-w-[300px]">
             <input
+              v-model="searchQuery"
               type="text"
-              placeholder="Tìm kiếm món ăn..."
+              placeholder="Tìm kiếm món ăn hoặc danh mục..."
               class="w-full pl-10 pr-4 h-11 border border-slate-200 rounded-xl focus:border-pink-500 outline-none text-sm transition-all"
             />
             <button
@@ -111,6 +120,7 @@ const submitProduct = () => {
                 <th class="p-4 font-semibold">ID</th>
                 <th class="p-4 font-semibold">Hình ảnh</th>
                 <th class="p-4 font-semibold">Tên sản phẩm</th>
+                <th class="p-4 font-semibold text-center">Mô tả</th>
                 <th class="p-4 font-semibold text-right">Giá</th>
                 <th class="p-4 font-semibold text-center">Tồn kho</th>
                 <th class="p-4 font-semibold text-center">Hành động</th>
@@ -118,7 +128,7 @@ const submitProduct = () => {
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
               <tr
-                v-for="item in products"
+                v-for="item in filteredProducts"
                 :key="item.id"
                 class="hover:bg-slate-50/80 transition-colors"
               >
@@ -132,6 +142,9 @@ const submitProduct = () => {
                 <td class="p-4 font-bold text-slate-800">
                   {{ item.name }}
                   <div class="text-[10px] text-orange-600 font-medium">{{ item.category }}</div>
+                </td>
+                <td class="p-4 text-sm text-slate-500">
+                  {{ item.description ? item.description : 'Không có mô tả' }}
                 </td>
                 <td class="p-4 text-right font-bold text-pink-600">
                   {{ item.price.toLocaleString() }}đ
@@ -150,6 +163,20 @@ const submitProduct = () => {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div
+          class="p-4 border-t border-slate-100 flex justify-between items-center text-sm text-slate-500"
+        >
+          <span>Danh sách sản phẩm</span>
+          <div class="flex gap-2">
+            <button class="px-3 py-1 border rounded hover:bg-slate-50 disabled:opacity-50" disabled>
+              Trước
+            </button>
+            <button class="px-3 py-1 border rounded bg-pink-500 text-white font-bold">1</button>
+            <button class="px-3 py-1 border rounded hover:bg-slate-50 disabled:opacity-50" disabled>
+              Sau
+            </button>
+          </div>
         </div>
       </section>
 

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 
+const searchQuery = ref('')
+
 // Dữ liệu mẫu khách hàng tiềm năng
-const leads = [
+const leads = ref([
   {
     id: 101,
     name: 'Nguyễn Văn A',
@@ -28,7 +30,16 @@ const leads = [
     status: 'Đã chốt',
     source: 'Giới thiệu',
   },
-]
+])
+
+const filteredLeads = computed(() => {
+  return leads.value.filter(
+    (lead) =>
+      lead.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      lead.phone.includes(searchQuery.value) ||
+      lead.email.toLowerCase().includes(searchQuery.value.toLowerCase()),
+  )
+})
 
 const newLead = ref({
   name: '',
@@ -59,7 +70,7 @@ const closeLeadModal = () => {
 const submitLead = () => {
   // Tam thoi push vao mang lead hien tai de test giao dien, sau nay se thay bang API call de them lead vao database
   const id = Math.floor(Math.random() * 1000)
-  leads.push({ id, ...newLead.value })
+  leads.value.push({ id, ...newLead.value })
   closeLeadModal()
   // sau nay o giai doan 2 ban se goi api.post('/leads', newLead.value) de them lead vao database, sau do goi lai API de lay danh sach lead moi nhat ve hien thi.
 }
@@ -98,8 +109,9 @@ const getStatusColor = (status: string) => {
         >
           <div class="flex items-center gap-2 flex-1 min-w-[300px]">
             <input
+              v-model="searchQuery"
               type="text"
-              placeholder="Tìm kiếm khách hàng..."
+              placeholder="Tìm kiếm theo tên, số điện thoại khách hàng"
               class="w-full pl-10 pr-4 h-11 border border-slate-200 rounded-xl focus:border-pink-500 outline-none text-sm transition-all"
             />
             <button
@@ -129,7 +141,7 @@ const getStatusColor = (status: string) => {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
-              <tr v-for="lead in leads" :key="lead.id" class="hover:bg-slate-50 transition-colors">
+              <tr v-for="lead in filteredLeads" :key="lead.id" class="hover:bg-slate-50 transition-colors">
                 <td class="p-4 font-mono text-slate-400 text-xs">#{{ lead.id }}</td>
                 <td class="p-4 font-bold">{{ lead.name }}</td>
                 <td class="p-4 text-sm">{{ lead.phone }}</td>
@@ -152,6 +164,20 @@ const getStatusColor = (status: string) => {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div
+          class="p-4 border-t border-slate-100 flex justify-between items-center text-sm text-slate-500"
+        >
+          <span>Danh sách khách hàng tiềm năng</span>
+          <div class="flex gap-2">
+            <button class="px-3 py-1 border rounded hover:bg-slate-50 disabled:opacity-50" disabled>
+              Trước
+            </button>
+            <button class="px-3 py-1 border rounded bg-pink-500 text-white font-bold">1</button>
+            <button class="px-3 py-1 border rounded hover:bg-slate-50 disabled:opacity-50" disabled>
+              Sau
+            </button>
+          </div>
         </div>
       </section>
 

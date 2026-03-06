@@ -8,7 +8,7 @@ import {
   Delete,
   Query,
   SetMetadata,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto'; // DTO kiểm soát dữ liệu đầu vào
@@ -45,6 +45,8 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @SetMetadata('roles', ['admin'])
+  @UseGuards(RolesGuard) // Sử dụng guard để kiểm tra quyền truy cập
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
   }

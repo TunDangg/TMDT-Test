@@ -12,6 +12,10 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CartItem } from './cart/entities/cart-item.entity'; // import module User vào đây để nest biết
 import { CartModule } from './cart/cart.module';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
+import { ProductsService } from './products/products.service';
 
 @Module({
   imports: [
@@ -26,14 +30,16 @@ import { CartModule } from './cart/cart.module';
       database: process.env.DB_DATABASE,
       autoLoadEntities: true, // Tự động nạp Product Entity ( chưa hiểu để làm gì )
       synchronize: false, // để false vì đã đã tạo bảng trong DataGrip rồi
-      entities: [Product, User, CartItem], // Đăng ký các entity với TypeOrm
+      entities: [Product, User, CartItem, Order, OrderItem], // Đăng ký các entity với TypeOrm
     }),
     UsersModule,
     ProductsModule, // module này ở đây để nest biết có chức năng qly spham
     AuthModule, // module này ở đây để nest biết có chức năng xác thực ng dùng
-    CartModule, // module này ở đây để nest biết có chức năng xác thực ng dùng
+    CartModule, // module này ở đây để nest biết có chức năng quản lý giỏ hàng
+    OrdersModule, // module này ở đây để nest biết có chức năng xác thực ng dùng
+    TypeOrmModule.forFeature([Product, Order, User]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ProductsService],
 })
 export class AppModule {}

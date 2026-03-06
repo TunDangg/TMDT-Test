@@ -18,12 +18,17 @@ export class Order {
   @Column('decimal', { precision: 10, scale: 2 })
   total_price: number;
 
-  @Column({ default : 'pending' }) // Trạng thái đơn hàng, mặc định là 'pending'
-  status: string; // pending, processing, completed, cancelled
+  @Column({
+    type: 'enum', // Kiểu enum để giới hạn giá trị status chỉ có 'pending', 'processing', 'shipped', 'delivered'
+    enum: ['pending', 'processing', 'shipped', 'completed', 'cancelled'], // Các trạng thái đơn hàng
+    default: 'pending', // Mặc định là 'pending' khi tạo mới
+  })
+  status: string;
 
   @CreateDateColumn()
   created_at: Date; // Ngày tạo đơn hàng
 
-  @OneToMany(() => OrderItem, (item) => item.order_items, { cascade: true })
-  order_items: OrderItem[]; // Mối quan hệ một-nhiều với OrderItem
+  //Quan trọng: Phải có dòng này để OrderItem có thể trỏ tới 'items' trong Order
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })
+  items: OrderItem[]; // Mối quan hệ một-nhiều với OrderItem
 }

@@ -1,60 +1,71 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import api from '@/services/api'
+import { Order } from '@/types'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 
 const searchQuery = ref('')
 
 // Dữ liệu mẫu Đơn hàng
-const orders = ref([
-  {
-    id: 'ORD001',
-    customer: 'Trần Tuấn Đăng',
-    total: 125000,
-    status: 'Chờ xử lý',
-    date: '2026-03-04 14:20',
-  },
-  {
-    id: 'ORD002',
-    customer: 'Nguyễn Văn A',
-    total: 45000,
-    status: 'Đang giao',
-    date: '2026-03-04 15:10',
-  },
-  {
-    id: 'ORD003',
-    customer: 'Lê Thị B',
-    total: 85000,
-    status: 'Đã hoàn thành',
-    date: '2026-03-03 10:30',
-  },
-  {
-    id: 'ORD004',
-    customer: 'Phạm Văn C',
-    total: 210000,
-    status: 'Đã hủy',
-    date: '2026-03-03 09:15',
-  },
-])
+const orders = ref(<Order[]>[])
+const isLoading = ref(true)
+
+// Ham lay danh sach don hang tu API
+const fetchOrders = async () => {
+  isLoading.value = true
+  try {
+    // Goi API lay danh sach don hang (thay doi URL theo API thuc te)
+    const response = await api.get('/orders')
+    orders.value = response.data // Gan du lieu nhan duoc vao bien orders
+  } catch (error) {
+    console.error('Lỗi khi tải đơn hàng:', error) // Bao loi neu server khong phan hoi
+  } finally {
+    isLoading.value = false // Du thanh cong hay loi, van tat trang thai loading
+  }
+}
+
+onMounted(() => {
+  fetchOrders()
+})
+
+// Ham cap nhat trang thai don hang ( admin )
+const updateOrderStatus = async (orderId: number, newStatus: string) => {
+  try {
+    // Goi API cap nhat trang thai don hang (thay doi URL theo API thuc te)
+    await api.patch(`/orders/${orderId}`, {
+      status: newStatus,
+    })
+    // Cap nhat trang thai trong frontend sau khi cap nhat thanh cong
+    const order = orders.value.find((o) => o.id === orderId)
+    if (order) {
+      order.status = newStatus as Order['status'] // Cap nhat trang thai trong frontend
+    }
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error)
+  }
+}
 
 // Logic lọc đơn hàng
 const filteredOrders = computed(() => {
   return orders.value.filter(
     (order) =>
-      order.id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.value.toLowerCase()),
+      order.id.toString().includes(searchQuery.value.toLowerCase()) ||
+      order.customer_name.toLowerCase().includes(searchQuery.value.toLowerCase()),
   )
 })
 
 // Màu sắc cho từng trạng thái đơn hàng
 const getStatusClass = (status: string) => {
   switch (status) {
-    case 'Chờ xử lý':
+    case 'pending':
       return 'bg-amber-100 text-amber-700'
-    case 'Đang giao':
+    case 'processing':
       return 'bg-blue-100 text-blue-700'
-    case 'Đã hoàn thành':
+    case 'shipped':
       return 'bg-green-100 text-green-700'
-    case 'Đã hủy':
+    case 'completed':
+      return 'bg-green-100 text-green-700'
+    case 'cancelled':
       return 'bg-red-100 text-red-700'
     default:
       return 'bg-slate-100 text-slate-700'
@@ -108,25 +119,34 @@ const getStatusClass = (status: string) => {
               <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                 <th class="p-4 font-semibold">Mã đơn</th>
                 <th class="p-4 font-semibold">Khách hàng</th>
-                <th class="p-4 font-semibold">Ngày đặt</th>
+                <th class="p-4 font-semibold">Địa Chỉ</th>
                 <th class="p-4 font-semibold text-right">Tổng tiền</th>
                 <th class="p-4 font-semibold text-center">Trạng thái</th>
                 <th class="p-4 font-semibold text-center">Hành động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
+              <tr v-if="isLoading">
+                <td colspan="6" class="p-8 text-center text-slate-500">
+                  Đang tải dữ liệu đơn hàng...
+                </td>
+              </tr>
+
               <tr
                 v-for="order in filteredOrders"
                 :key="order.id"
                 class="hover:bg-slate-50/80 transition-colors"
               >
-                <td class="p-4 font-mono font-bold text-pink-600 text-sm">{{ order.id }}</td>
-                <td class="p-4">
-                  <div class="font-bold text-slate-800">{{ order.customer }}</div>
+                <td class="p-4 font-mono font-bold text-pink-600 text-sm">#ORD{{ order.id }}</td>
+                <td class="p-4 font-bold text-slate-800">
+                  {{ order.customer_name }}
+                  <div class="text-[10px] text-slate-500 font-normal">
+                    {{ order.customer_phone }}
+                  </div>
                 </td>
-                <td class="p-4 text-xs text-slate-500">{{ order.date }}</td>
+                <td class="p-4 text-xs text-slate-500">{{ order.customer_address }}</td>
                 <td class="p-4 text-right font-bold text-slate-900">
-                  {{ order.total.toLocaleString() }}đ
+                  {{ Number(order.total_price).toLocaleString() }}đ
                 </td>
                 <td class="p-4 text-center">
                   <span
@@ -139,14 +159,28 @@ const getStatusClass = (status: string) => {
                   </span>
                 </td>
                 <td class="p-4 text-center whitespace-nowrap">
-                  <button
-                    class="text-blue-500 hover:text-blue-700 mr-3 text-sm font-bold underline"
-                  >
-                    Xem chi tiết
-                  </button>
-                  <button class="text-slate-400 hover:text-slate-600 text-sm font-bold">
-                    In đơn
-                  </button>
+                  <div class="flex items-center justify-center gap-3">
+                    <select
+                      @change="updateOrderStatus(order.id, $event.target.value)"
+                      class="text-xs border rounded-lg p-1.5 outline-none focus:border-pink-500 bg-white"
+                      :value="order.status"
+                    >
+                      <option value="pending">Chờ xử lý</option>
+                      <option value="processing">Đang chuẩn bị</option>
+                      <option value="shipped">Đang giao</option>
+                      <option value="completed">Đã hoàn thành</option>
+                      <option value="cancelled">Hủy đơn</option>
+                    </select>
+
+                    <div class="flex gap-2 ml-2">
+                      <button class="text-blue-500 hover:underline text-xs font-bold">
+                        Xem chi tiết
+                      </button>
+                      <button class="text-slate-400 hover:text-slate-600 text-xs font-bold">
+                        In đơn
+                      </button>
+                    </div>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -156,7 +190,7 @@ const getStatusClass = (status: string) => {
         <div
           class="p-4 border-t border-slate-100 flex justify-between items-center text-sm text-slate-500"
         >
-          <span>Hiển thị 1 - 4 của 4 đơn hàng</span>
+          <span>Danh sách đơn hàng</span>
           <div class="flex gap-2">
             <button class="px-3 py-1 border rounded hover:bg-slate-50 disabled:opacity-50" disabled>
               Trước

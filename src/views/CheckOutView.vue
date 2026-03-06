@@ -3,6 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useToast } from 'vue-toastification'
 import { useRouter } from 'vue-router'
+import api from '@/services/api'
 
 const cart = useCartStore()
 const toast = useToast()
@@ -49,6 +50,44 @@ const handleCheckout = () => {
   toast.info('Vui lòng quét mã QR để thanh toán', {
     timeout: 3000,
   })
+}
+
+// Hàm này sẽ được gọi khi người dùng xác nhận đã chuyển khoản xong
+const confirmPayment = async () => {
+  try {
+    // 1. Chuẩn bị dữ liệu đơn hàng theo đúng CreateOrderDto backend
+    const orderData = {
+      customer_name: form.value.fullname,
+      customer_phone: form.value.phone,
+      customer_address: form.value.address,
+      total_price: cart.totalPrice,
+      items: cart.items.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    }
+
+    // 2. Gọi API POST /orders
+    await api.post('/orders', orderData)
+
+    // 3. Thông báo và dọn dẹp
+    toast.success('Đơn hàng của bạn đã được đặt thành công!', { timeout: 3000 })
+    isShowQR.value = false
+    await cart.clearCart() // Xóa giỏ hàng sau khi đặt hàng thành công
+
+    // Xóa thông tin khách hàng đã lưu
+    localStorage.removeItem(infoKey)
+
+    // Quay về trang chủ sau 1 giây
+    setTimeout(() => {
+      router.push('/')
+    }, 1000)
+  } catch (error: unknown) {
+    console.error('Lỗi khi đặt hàng:', error)
+    const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!'
+    toast.error(errorMessage, { timeout: 5000 })
+  }
 }
 
 //1. LocalStorage
@@ -240,7 +279,7 @@ onMounted(async () => {
               </div>
 
               <button
-                @click="isShowQR = false"
+                @click="confirmPayment"
                 class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95"
               >
                 Xác nhận đã chuyển khoản

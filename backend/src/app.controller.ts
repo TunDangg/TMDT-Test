@@ -9,4 +9,9 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('admin/stats')
+  async getAdminStats() {
+    return await this.appService.getStats();
+  }
 }

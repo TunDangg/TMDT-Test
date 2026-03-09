@@ -15,6 +15,7 @@ import { CreateProductDto } from './dto/create-product.dto'; // DTO kiểm soát
 import { UpdateProductDto } from './dto/update-product.dto';
 
 import { RolesGuard} from '../auth/roles.guard';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -24,7 +25,7 @@ export class ProductsController {
 
   @Post()
   @SetMetadata('roles', ['admin']) // Chỉ cho phép admin mới có quyền tạo sản phẩm
-  @UseGuards(RolesGuard) // Sử dụng guard để kiểm tra quyền truy cập
+  @UseGuards(AuthGuard, RolesGuard) // Sử dụng guard để kiểm tra quyền truy cập
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
@@ -46,7 +47,7 @@ export class ProductsController {
 
   @Delete(':id')
   @SetMetadata('roles', ['admin'])
-  @UseGuards(RolesGuard) // Sử dụng guard để kiểm tra quyền truy cập
+  @UseGuards(AuthGuard, RolesGuard) // Sử dụng guard để kiểm tra quyền truy cập
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
   }

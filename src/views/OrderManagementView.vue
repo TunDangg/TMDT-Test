@@ -109,7 +109,7 @@ const getStatusClass = (status: string) => {
           <button
             class="h-11 px-6 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2"
           >
-            📄 Xuất Excel
+            Xuất Excel
           </button>
         </div>
 

@@ -2,6 +2,19 @@
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import AdminSidebar from '@/components/AdminSidebar.vue'
+import {
+  DollarSign,
+  Package,
+  Utensils,
+  RefreshCcw,
+  Clock,
+  CheckCircle,
+  Truck,
+  XCircle,
+  Loader2,
+  TrendingUp,
+  ChevronRight,
+} from 'lucide-vue-next'
 
 const stats = ref({
   totalProducts: 0,
@@ -14,37 +27,51 @@ const stats = ref({
   cancelled: 0,
 })
 
-// Màu sắc cho từng trạng thái đơn hàng
-const getStatusIconClass = (key: string) => {
-  const colors: Record<string, string> = {
-    pending: 'text-amber-400',
-    processing: 'text-blue-400',
-    shipped: 'text-indigo-400',
-    completed: 'text-green-500',
-    cancelled: 'text-red-400',
+const isLoading = ref(true)
+
+// Hàm lấy icon tương ứng với từng trạng thái
+const getStatusIcon = (key: string) => {
+  switch (key) {
+    case 'pending':
+      return Clock
+    case 'processing':
+      return Loader2
+    case 'shipped':
+      return Truck
+    case 'completed':
+      return CheckCircle
+    case 'cancelled':
+      return XCircle
+    default:
+      return Package
   }
-  return colors[key] || 'text-slate-300'
 }
 
-const isLoading = ref(true)
+const getStatusColorClass = (key: string) => {
+  const colors: Record<string, string> = {
+    pending: 'text-amber-500 bg-amber-50',
+    processing: 'text-blue-500 bg-blue-50',
+    shipped: 'text-indigo-500 bg-indigo-50',
+    completed: 'text-green-500 bg-green-50',
+    cancelled: 'text-red-500 bg-red-50',
+  }
+  return colors[key] || 'text-slate-400 bg-slate-50'
+}
 
 const fetchStats = async () => {
   isLoading.value = true
   try {
-    // Gọi API để lấy số liệu thống kê (thay đổi URL theo API thực tế)
     const response = await api.get('/admin/stats')
-    stats.value = response.data // Gán dữ liệu nhận được vào biến stats
+    stats.value = response.data
   } catch (error) {
-    console.error('Lỗi khi tải số liệu thống kê:', error) // Báo lỗi nếu server không phản hồi
+    console.error('Lỗi khi tải số liệu thống kê:', error)
   } finally {
-    // Tạo độ trễ nhẹ để hiệu ứng loading mượt mà hơn
     setTimeout(() => {
       isLoading.value = false
     }, 500)
   }
 }
 
-// Hàm định dạng số thành định dạng tiền tệ Việt Nam
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 }
@@ -61,16 +88,18 @@ onMounted(() => {
     <main class="flex-1 w-full p-6 lg:p-10 overflow-x-hidden">
       <header class="flex justify-between items-center mb-10">
         <div>
-          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Bảng điều khiển</h1>
+          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight text-pink-500">
+            Bảng điều khiển
+          </h1>
           <p class="text-slate-500 mt-1 text-sm font-medium">
             Chào mừng trở lại, hệ thống đang hoạt động tốt.
           </p>
         </div>
         <button
           @click="fetchStats"
-          class="p-2 hover:rotate-180 transition-all duration-500 text-slate-400"
+          class="p-2 hover:rotate-180 transition-all duration-500 text-slate-400 hover:text-pink-500 bg-white rounded-full shadow-sm"
         >
-          🔄
+          <RefreshCcw :size="20" :class="{ 'animate-spin': isLoading }" />
         </button>
       </header>
 
@@ -79,38 +108,50 @@ onMounted(() => {
           class="relative overflow-hidden bg-gradient-to-br from-pink-500 to-rose-600 p-8 rounded-[2rem] shadow-xl shadow-pink-200 text-white"
         >
           <div class="relative z-10">
-            <p class="text-pink-100 text-sm font-bold uppercase tracking-widest">Tổng doanh thu</p>
+            <div
+              class="flex items-center gap-2 text-pink-100 text-sm font-bold uppercase tracking-widest"
+            >
+              <TrendingUp :size="16" />
+              Tổng doanh thu
+            </div>
             <h3 class="text-4xl font-black mt-3">{{ formatCurrency(stats.totalRevenue) }}</h3>
           </div>
-          <div class="absolute -right-4 -bottom-4 text-white/10 text-9xl font-black italic">💰</div>
+          <DollarSign class="absolute -right-4 -bottom-4 text-white/10" :size="160" />
         </div>
 
         <div
-          class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between"
+          class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between group hover:border-blue-200 transition-all"
         >
           <div>
-            <p class="text-slate-500 text-sm font-bold uppercase">Tổng đơn hàng</p>
+            <div
+              class="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-4"
+            >
+              <Package :size="24" />
+            </div>
+            <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Tổng đơn hàng</p>
             <h3 class="text-4xl font-black text-slate-800 mt-2">{{ stats.totalOrders }}</h3>
           </div>
         </div>
 
         <div
-          class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between"
+          class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between group hover:border-orange-200 transition-all"
         >
           <div>
             <div
-              class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center text-xl mb-4"
+              class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-4"
             >
-              🍔
+              <Utensils :size="24" />
             </div>
-            <p class="text-slate-500 text-sm font-bold uppercase">Sản phẩm hiện có</p>
+            <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">
+              Sản phẩm hiện có
+            </p>
             <h3 class="text-4xl font-black text-slate-800 mt-2">{{ stats.totalProducts }}</h3>
           </div>
           <button
-              @click="$router.push('/admin/products')"
-            class="text-slate-400 text-xs font-bold mt-4 hover:text-pink-500 transition-colors"
+            @click="$router.push('/admin/products')"
+            class="flex items-center text-slate-400 text-xs font-bold mt-4 hover:text-pink-500 transition-colors"
           >
-            Quản lý sản phẩm →
+            Quản lý sản phẩm <ChevronRight :size="14" class="ml-1" />
           </button>
         </div>
       </div>
@@ -130,17 +171,23 @@ onMounted(() => {
             cancelled: 'Đã hủy',
           }"
           :key="key"
-          class="group bg-white p-5 rounded-2xl border border-slate-100 hover:border-pink-200 hover:shadow-lg hover:shadow-pink-50 transition-all cursor-default"
+          class="group bg-white p-6 rounded-2xl border border-slate-100 hover:border-pink-200 hover:shadow-lg hover:shadow-pink-50 transition-all cursor-default"
         >
-          <p
-            class="text-[10px] font-black uppercase tracking-tighter text-slate-400 group-hover:text-pink-400 transition-colors"
-          >
-            {{ val }}
-          </p>
-          <div class="flex items-end justify-between mt-2">
-            <p class="text-3xl font-black text-slate-700">{{ stats[key] }}</p>
-            <div :class="getStatusIconClass(key)" class="text-lg opacity-50">●</div>
+          <div class="flex justify-between items-start mb-4">
+            <p
+              class="text-[10px] font-black uppercase tracking-tighter text-slate-400 group-hover:text-pink-400 transition-colors"
+            >
+              {{ val }}
+            </p>
+            <div :class="getStatusColorClass(key)" class="p-2 rounded-lg transition-colors">
+              <component
+                :is="getStatusIcon(key)"
+                :size="16"
+                :class="{ 'animate-spin': key === 'processing' && isLoading }"
+              />
+            </div>
           </div>
+          <p class="text-3xl font-black text-slate-700">{{ stats[key] }}</p>
         </div>
       </div>
     </main>

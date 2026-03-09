@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import api from '@/services/api'
+import { useToast } from 'vue-toastification'
 import { Products } from '@/types'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 
 const searchQuery = ref('')
+const toast = useToast()
 
 // Dữ liệu sản phẩm (Giai đoạn sau sẽ dùng ref và gọi API)
 const products = ref<Products[]>([])
+const isProductModalOpen = ref(false)
+const isEditMode = ref(false)
+const currentEditId = ref<number | null>(null) // Biến tạm để lưu thông tin sản phẩm khi đang sửa
 
 const filteredProducts = computed(() => {
   return products.value.filter(
@@ -41,10 +46,34 @@ const newProduct = ref({
   category: 'Món chính',
 })
 
-const isProductModalOpen = ref(false)
-
-const openProductModal = () => {
+const openEditModal = (product: Products) => {
+  isEditMode.value = true
+  currentEditId.value = product.id
+  newProduct.value = {
+    name: product.name,
+    price: product.price,
+    description: product.description || '',
+    image_url: product.image_url || '',
+    stock_quantity: product.stock_quantity,
+    category: product.category || 'Món chính',
+  } // Sao chép dữ liệu sản phẩm vào form để sửa
   isProductModalOpen.value = true
+}
+
+// Cập nhập lại hàm openProductModal để reset form khi thêm mới
+const openProductModal = () => {
+  isEditMode.value = false
+  currentEditId.value = null
+  isProductModalOpen.value = true
+  // Reset form về mặc định
+  newProduct.value = {
+    name: '',
+    price: 0,
+    description: '',
+    image_url: '',
+    stock_quantity: 0,
+    category: 'Món chính',
+  }
 }
 
 const closeProductModal = () => {
@@ -62,15 +91,35 @@ const closeProductModal = () => {
 
 const submitProduct = async () => {
   try {
-    // Gọi API để thêm sản phẩm mới
-    await api.post('/products', newProduct.value)
-    alert('Thêm sản phẩm thành công!')
-    // Sau khi thêm thành công, tải lại danh sách sản phẩm để cập nhật giao diện
+    if (isEditMode.value && currentEditId.value) {
+      // Gọi API cập nhật sản phẩm (thay đổi URL theo API thực tế)
+      await api.patch(`/products/${currentEditId.value}`, newProduct.value)
+      toast.success('Cập nhật sản phẩm thành công', { timeout: 3000 })
+    } else {
+      // Gọi API thêm sản phẩm mới (thay đổi URL theo API thực tế)
+      await api.post('/products', newProduct.value)
+      toast.success('Thêm sản phẩm thành công', { timeout: 3000 })
+    }
     await fetchProducts()
+    closeProductModal()
   } catch (error) {
     console.error('Lỗi khi thêm sản phẩm:', error)
+    toast.error('Có lỗi xảy ra. Vui lòng thử lại.', { timeout: 3000 })
   }
-  closeProductModal()
+}
+
+const deleteProduct = async (productId: number) => {
+  if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+    try {
+      // Gọi API xóa sản phẩm (thay đổi URL theo API thực tế)
+      await api.delete(`/products/${productId}`)
+      toast.success('Xóa sản phẩm thành công', { timeout: 3000 })
+      await fetchProducts()
+    } catch (error) {
+      console.error('Lỗi khi xóa sản phẩm:', error)
+      toast.error('Có lỗi xảy ra. Vui lòng thử lại.', { timeout: 3000 })
+    }
+  }
 }
 </script>
 
@@ -155,10 +204,18 @@ const submitProduct = async () => {
                   >
                 </td>
                 <td class="p-4 text-center whitespace-nowrap">
-                  <button class="text-blue-500 hover:text-blue-700 mr-3 text-sm font-bold">
+                  <button
+                    @click="openEditModal(item)"
+                    class="text-blue-500 hover:text-blue-700 mr-3 text-sm font-bold"
+                  >
                     Sửa
                   </button>
-                  <button class="text-red-500 hover:text-red-700 text-sm font-bold">Xóa</button>
+                  <button
+                    @click="deleteProduct(item.id)"
+                    class="text-red-500 hover:text-red-700 text-sm font-bold"
+                  >
+                    Xóa
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -195,7 +252,9 @@ const submitProduct = async () => {
           <div
             class="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50"
           >
-            <h3 class="text-xl font-bold text-slate-800">🍱 Thêm món ăn mới</h3>
+            <h3 class="text-xl font-bold text-slate-800">
+              {{ isEditMode ? '📝 Cập nhật món ăn' : '🍱 Thêm món ăn mới' }}
+            </h3>
             <button @click="closeProductModal" class="text-slate-400 hover:text-slate-600 text-3xl">
               &times;
             </button>
@@ -298,7 +357,7 @@ const submitProduct = async () => {
                 type="submit"
                 class="flex-1 px-6 py-3 bg-pink-500 text-white rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-100"
               >
-                Lưu sản phẩm
+                {{ isEditMode ? 'Cập nhật ngay' : 'Lưu sản phẩm' }}
               </button>
             </div>
           </form>

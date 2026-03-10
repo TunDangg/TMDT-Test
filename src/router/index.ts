@@ -54,6 +54,12 @@ const router = createRouter({
       name: 'admin-orders',
       component: () => import('../views/OrderManagementView.vue'), // Lazy load trang admin orders
       meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../views/ProfileView.vue'), // Lazy load trang profile
+      meta: { requiresAuth: true }, // Cần xác thực nhưng không cần phải là admin
     }
   ],
 })

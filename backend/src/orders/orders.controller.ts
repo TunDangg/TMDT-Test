@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Request,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('orders')
 export class OrdersController {
@@ -17,6 +28,13 @@ export class OrdersController {
   @Get()
   async findAll() {
     return this.ordersService.findAll();
+  }
+
+  @UseGuards(AuthGuard) // Chỉ cho phép người dùng đã đăng nhập mới có quyền xem đơn hàng của mình
+  @Get('my-orders')
+  async findMyOrders(@Request() req) {
+    const userId = req.user.userId || req.user.id; // Lấy userId từ token đã giải mã
+    return this.ordersService.findMyOrders(userId);
   }
 
   // GET /orders/:id - Lấy chi tiết 1 đơn hàng

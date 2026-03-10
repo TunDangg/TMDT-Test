@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
@@ -33,5 +33,14 @@ export class UsersService {
   // Hàm này để tìm user theo username
   async findOneByUsername(username: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { username } });
+  }
+
+  async findProfile(id: number) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      select: ['id', 'username', 'role'], // Chỉ lấy các trường cần thiết, không trả về password
+    });
+    if (!user) throw new NotFoundException(`Không tìm thấy user có id là ${id}`);
+    return user;
   }
 }

@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Order } from '../../orders/entities/order.entity';
 
 export enum UserRole {
   USER = 'user',
@@ -22,5 +23,8 @@ export class User {
     default: UserRole.USER,
   })
   role: UserRole;
+
+  @OneToMany(() => Order, (order) => order.user) // Mối quan hệ một-nhiều với Order
+  orders: Order[]; // Một user có thể có nhiều đơn hàng
 
 }

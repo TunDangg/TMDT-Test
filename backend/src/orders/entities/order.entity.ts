@@ -1,5 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { OrderItem } from './order-item.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('orders')
 export class Order {
@@ -27,6 +36,10 @@ export class Order {
 
   @CreateDateColumn()
   created_at: Date; // Ngày tạo đơn hàng
+
+  @ManyToOne(() => User, (user) => user.orders, { cascade: true })
+  @JoinColumn({ name: 'user_id' }) // Tên cột khóa ngoại trong bảng orders
+  user: User; // Mối quan hệ nhiều-một với User
 
   //Quan trọng: Phải có dòng này để OrderItem có thể trỏ tới 'items' trong Order
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })

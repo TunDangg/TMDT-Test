@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
+import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -79,5 +79,13 @@ export class OrdersService {
 
   async remove(id: number) {
     return await this.orderRepository.delete(id);
+  }
+  // Lay tat ca don hang cua 1 user ( cho user xem lich su don hang )
+  async findMyOrders(userId: number) {
+    return await this.orderRepository.find({
+      where: { user: { id: userId } },
+      relations: ['items', 'items.product'], // Lấy luôn thông tin món ăn liên quan trong mỗi đơn hàng
+      order: { created_at: 'DESC' }, // Sắp xếp theo ngày tạo mới nhất
+    });
   }
 }

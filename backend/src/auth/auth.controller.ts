@@ -1,8 +1,9 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Get, Request, Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { UsersService } from '../users/entities/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth') // Đường dẫn gốc sẽ là localhost:3000/auth
 export class AuthController {
@@ -10,6 +11,12 @@ export class AuthController {
     private usersService: UsersService,
     private authService: AuthService,
   ) {}
+
+  @UseGuards(AuthGuard)
+  @Get('profile') // Đường dẫn sẽ là localhost:3000/auth/profile
+  getProfile(@Request() req) {
+    return this.usersService.findProfile(req.user.userId);
+  }
 
   @HttpCode(HttpStatus.OK)
   @Post('login') // Đường dẫn sẽ là localhost:3000/auth/login

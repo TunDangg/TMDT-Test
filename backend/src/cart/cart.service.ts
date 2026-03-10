@@ -58,7 +58,7 @@ export class CartService {
 
     // Check stock
     if (product.stock_quantity !== undefined && product.stock_quantity === 0) {
-      throw new Error('Sản phẩm đã hết hàng');
+      throw new Error(`${product.name} đã hết hàng`);
     }
 
     let cartItem = await this.cartRepository.findOne({
@@ -72,7 +72,7 @@ export class CartService {
 
       // Check stock limit
       if (product.stock_quantity !== undefined && newQuantity > product.stock_quantity) {
-        throw new Error(`Chỉ còn ${product.stock_quantity} sản phẩm trong kho`);
+        throw new Error(`Chỉ còn ${product.stock_quantity} sản phẩm ${product.name} trong kho`);
       }
 
       // If quantity becomes 0 or negative, remove item
@@ -89,7 +89,7 @@ export class CartService {
       }
 
       if (product.stock_quantity !== undefined && quantity > product.stock_quantity) {
-        throw new Error(`Chỉ còn ${product.stock_quantity} sản phẩm trong kho`);
+        throw new Error(`Chỉ còn ${product.stock_quantity} sản phẩm ${product.name} trong kho`);
       }
 
       cartItem = this.cartRepository.create({
@@ -100,7 +100,7 @@ export class CartService {
     }
 
     await this.cartRepository.save(cartItem);
-    return { success: true, message: 'Thêm vào giỏ hàng thành công!' };
+    return { success: true, message: `Thêm ${product.name} vào giỏ hàng thành công!` };
   }
 
   // 3. Xóa sản phẩm khỏi giỏ hàng

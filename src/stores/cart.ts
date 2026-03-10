@@ -55,7 +55,8 @@ export const useCartStore = defineStore('cart', {
         const result = await response.json()
         if (response.ok) {
           await this.fetchCart() // Cập nhật lại state sau khi lưu DB thành công
-          return { success: true, message: result.message || 'Thêm vào giỏ hàng thành công!' }
+          // Always use product name from parameter to ensure it's shown
+          return { success: true, message: `Thêm ${product.name} vào giỏ hàng thành công!` }
         }
         return { success: false, message: result.message || 'Lỗi hệ thống' }
       } catch (error) {
@@ -132,7 +133,7 @@ export const useCartStore = defineStore('cart', {
           if (productData.stock_quantity === 0) {
             invalidItems.push({
               product: item,
-              reason: 'Sản phẩm đã hết hàng',
+              reason: `${productData.name} đã hết hàng`,
             })
           } else if (productData.stock_quantity < item.quantity) {
             invalidItems.push({

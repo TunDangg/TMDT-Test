@@ -3,12 +3,15 @@ import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 import { Order } from '@/types'
 import AdminSidebar from '@/components/AdminSidebar.vue'
+import { ReceiptText, Printer, X, PackageSearch, Search, FileSpreadsheet } from 'lucide-vue-next'
 
 const searchQuery = ref('')
 
 // Dữ liệu mẫu Đơn hàng
 const orders = ref(<Order[]>[])
 const isLoading = ref(true)
+const isOrderDetailModalOpen = ref(false)
+const selectedOrder = ref<Order | null>(null)
 
 // Ham lay danh sach don hang tu API
 const fetchOrders = async () => {
@@ -53,6 +56,29 @@ const filteredOrders = computed(() => {
       order.customer_name.toLowerCase().includes(searchQuery.value.toLowerCase()),
   )
 })
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return '---'
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+}
+
+// Ham xu ly khi nhan nut "Xem chi tiet" (admin)
+const showDetail = async (orderId: number) => {
+  try {
+    const response = await api.get(`/orders/${orderId}`)
+    selectedOrder.value = response.data
+    isOrderDetailModalOpen.value = true
+  } catch (error) {
+    console.error('Lỗi khi tải chi tiết đơn hàng:', error)
+  }
+}
 
 // Màu sắc cho từng trạng thái đơn hàng
 const getStatusClass = (status: string) => {
@@ -107,7 +133,7 @@ const getStatusClass = (status: string) => {
             </button>
           </div>
           <button
-            class="h-11 px-6 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+            class="h-11 px-6 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2"
           >
             Xuất Excel
           </button>
@@ -118,6 +144,7 @@ const getStatusClass = (status: string) => {
             <thead>
               <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                 <th class="p-4 font-semibold">Mã đơn</th>
+                <th class="p-4 font-semibold text-center">Thời gian đặt</th>
                 <th class="p-4 font-semibold">Khách hàng</th>
                 <th class="p-4 font-semibold">Địa Chỉ</th>
                 <th class="p-4 font-semibold text-right">Tổng tiền</th>
@@ -138,6 +165,16 @@ const getStatusClass = (status: string) => {
                 class="hover:bg-slate-50/80 transition-colors"
               >
                 <td class="p-4 font-mono font-bold text-pink-600 text-sm">#ORD{{ order.id }}</td>
+
+                <td class="p-4 text-center">
+                  <div class="text-sm font-medium text-slate-700">
+                    {{ formatDate(order.created_at).split(' ')[0] }}
+                  </div>
+                  <div class="text-[10px] text-slate-400">
+                    {{ formatDate(order.created_at).split(' ')[1] }}
+                  </div>
+                </td>
+
                 <td class="p-4 font-bold text-slate-800">
                   {{ order.customer_name }}
                   <div class="text-[10px] text-slate-500 font-normal">
@@ -173,7 +210,10 @@ const getStatusClass = (status: string) => {
                     </select>
 
                     <div class="flex gap-2 ml-2">
-                      <button class="text-blue-500 hover:underline text-xs font-bold">
+                      <button
+                        @click="showDetail(order.id)"
+                        class="text-blue-500 hover:underline text-xs font-bold"
+                      >
                         Xem chi tiết
                       </button>
                       <button class="text-slate-400 hover:text-slate-600 text-xs font-bold">
@@ -202,6 +242,121 @@ const getStatusClass = (status: string) => {
           </div>
         </div>
       </section>
+
+      <!-- Modal chi tiết đơn hàng (hiển thị khi isOrderDetailModalOpen = true) -->
+      <div
+        v-if="isOrderDetailModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in duration-200 flex flex-col"
+        >
+          <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <div class="flex items-center gap-2 text-slate-600">
+              <ReceiptText :size="20" />
+              <span class="font-bold uppercase text-xs tracking-widest">Xem trước hóa đơn</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all"
+              >
+                <Printer :size="14" /> In hóa đơn
+              </button>
+              <button
+                @click="isOrderDetailModalOpen = false"
+                class="p-1.5 hover:bg-slate-200 rounded-full transition-all"
+              >
+                <X :size="18" />
+              </button>
+            </div>
+          </div>
+
+          <div class="p-10 overflow-y-auto bg-slate-100/30 flex-1">
+            <div
+              class="bg-white shadow-sm border border-slate-200 p-8 mx-auto w-full font-serif text-slate-800 relative"
+            >
+              <div class="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-6">
+                <div>
+                  <h2 class="text-2xl font-black text-pink-600 italic leading-none">
+                    EDTEXCO <span class="text-slate-900 not-italic">STORE</span>
+                  </h2>
+                  <p class="text-[10px] mt-1 text-slate-500 font-sans uppercase tracking-tighter">
+                    Hệ thống đồ ăn nhanh số 1 Việt Nam
+                  </p>
+                </div>
+                <div class="text-right text-[11px] font-sans leading-relaxed">
+                  <p class="font-bold">HÓA ĐƠN BÁN LẺ</p>
+                  <p>Số: #ORD{{ selectedOrder?.id }}</p>
+                  <p>Ngày: {{ formatDate(selectedOrder?.created_at) }}</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 mb-8 text-xs font-sans">
+                <div>
+                  <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Khách hàng:</p>
+                  <p class="font-bold text-sm">{{ selectedOrder?.customer_name }}</p>
+                  <p>{{ selectedOrder?.customer_phone }}</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">
+                    Địa chỉ giao hàng:
+                  </p>
+                  <p class="italic">{{ selectedOrder?.customer_address }}</p>
+                </div>
+              </div>
+
+              <table class="w-full text-xs font-sans mb-8">
+                <thead>
+                  <tr class="border-b border-slate-200 text-left">
+                    <th class="py-2 font-bold uppercase text-[10px]">Món ăn</th>
+                    <th class="py-2 font-bold uppercase text-[10px] text-center">SL</th>
+                    <th class="py-2 font-bold uppercase text-[10px] text-right">Đơn giá</th>
+                    <th class="py-2 font-bold uppercase text-[10px] text-right">Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr v-for="item in selectedOrder?.items" :key="item.id">
+                    <td class="py-3 font-medium">{{ item.product?.name }}</td>
+                    <td class="py-3 text-center">{{ item.quantity }}</td>
+                    <td class="py-3 text-right">{{ item.price.toLocaleString() }}đ</td>
+                    <td class="py-3 text-right font-bold">
+                      {{ (item.price * item.quantity).toLocaleString() }}đ
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="border-t-2 border-slate-900 pt-4 flex flex-col items-end gap-2 font-sans">
+                <div class="flex justify-between w-48 text-xs">
+                  <span>Tạm tính:</span>
+                  <span>{{ Number(selectedOrder?.total_price).toLocaleString() }}đ</span>
+                </div>
+                <div class="flex justify-between w-48 text-xs">
+                  <span>Phí vận chuyển:</span>
+                  <span>0đ</span>
+                </div>
+                <div
+                  class="flex justify-between w-48 text-sm font-black border-t border-slate-100 pt-2 mt-2"
+                >
+                  <span class="uppercase">Tổng cộng:</span>
+                  <span class="text-pink-600"
+                    >{{ Number(selectedOrder?.total_price).toLocaleString() }}đ</span
+                  >
+                </div>
+              </div>
+
+              <div class="mt-10 text-center font-sans">
+                <p class="text-[10px] italic text-slate-400">
+                  Cảm ơn quý khách đã tin tưởng và ủng hộ EDTEXCO Fast Food Store!
+                </p>
+                <div class="mt-4 flex justify-center gap-1 opacity-20">
+                  <div v-for="i in 20" :key="i" class="w-1 h-1 bg-slate-900 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </template>

@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useToast } from 'vue-toastification'
+import { ShoppingCart } from 'lucide-vue-next'
 
 const cart = useCartStore()
 const toast = useToast()
@@ -42,6 +43,7 @@ const handleAddMore = async (item: any) => {
   >
     <div class="p-6 h-full flex flex-col">
       <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <ShoppingCart :size="24" class="text-orange-500" />
         <h2 class="text-xl font-bold">Giỏ hàng ({{ cart.totalItems }})</h2>
         <button @click="$emit('close')" class="text-2xl hover:text-red-500 transition">✕</button>
       </div>

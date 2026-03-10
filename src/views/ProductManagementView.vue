@@ -43,7 +43,7 @@ const newProduct = ref({
   description: '',
   image_url: '',
   stock_quantity: 0,
-  category: 'Món chính',
+  category: 'Đồ ăn nhanh',
 })
 
 const openEditModal = (product: Products) => {
@@ -55,7 +55,7 @@ const openEditModal = (product: Products) => {
     description: product.description || '',
     image_url: product.image_url || '',
     stock_quantity: product.stock_quantity,
-    category: product.category || 'Món chính',
+    category: product.category || 'Đồ ăn nhanh',
   } // Sao chép dữ liệu sản phẩm vào form để sửa
   isProductModalOpen.value = true
 }
@@ -72,7 +72,7 @@ const openProductModal = () => {
     description: '',
     image_url: '',
     stock_quantity: 0,
-    category: 'Món chính',
+    category: 'Đồ ăn nhanh',
   }
 }
 
@@ -85,7 +85,7 @@ const closeProductModal = () => {
     description: '',
     image_url: '',
     stock_quantity: 0,
-    category: 'Món chính',
+    category: 'Đồ ăn nhanh ',
   }
 }
 
@@ -312,9 +312,9 @@ const deleteProduct = async (productId: number) => {
                   v-model="newProduct.category"
                   class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-pink-500 outline-none transition-all cursor-pointer"
                 >
-                  <option value="Món chính">Món chính</option>
                   <option value="Đồ ăn nhanh">Đồ ăn nhanh</option>
                   <option value="Đồ uống">Đồ uống</option>
+                  <option value="Ăn vặt">Ăn vặt</option>
                 </select>
               </div>
 

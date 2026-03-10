@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import { ShoppingCart } from 'lucide-vue-next'
 import { useCartStore } from '@/stores/cart'
 import { useToast } from 'vue-toastification'
 import { useRouter } from 'vue-router'
@@ -173,7 +174,8 @@ onMounted(async () => {
     >
       <div class="p-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
-          <span class="mr-3 text-green-600">🛒</span> Xác nhận thanh toán
+          <ShoppingCart :size="26" class="text-green-500 mr-2" />
+          Thanh toán đơn hàng
         </h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">

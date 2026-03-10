@@ -10,7 +10,7 @@ import { useCartStore } from '@/stores/cart' // Import kho quản lý giỏ hàn
 import { useSearchStore } from '@/stores/search' // Import kho quản lý tìm kiếm (Pinia)
 import { useToast } from 'vue-toastification' // Thư viện hiển thị thông báo "pop-up" nhanh
 import { Products } from '@/types' // Import kiểu dữ liệu Product
-import { Zap, ArrowRight, TrendingUp } from 'lucide-vue-next'
+import { Zap, ArrowRight, TrendingUp, Frown } from 'lucide-vue-next'
 
 /* --- ĐỊNH NGHĨA TYPES --- */
 interface BackendInfo {
@@ -27,7 +27,7 @@ const searchStore = useSearchStore() // Kết nối với kho chứa từ khóa 
 const toast = useToast() // Tạo biến 'toast' để gọi lệnh hiện thông báo
 
 const selectedCategory = ref('Tất cả') // Mặc định hiển thị tất cả sản phẩm
-const categories = ['Tất cả', 'Thức ăn', 'Đồ uống', 'Ăn vặt'] // Danh sách các nút sẽ hiển thị
+const categories = ['Tất cả', 'Đồ ăn nhanh', 'Đồ uống', 'Ăn vặt'] // Danh sách các nút sẽ hiển thị
 const isLoading = ref(true)
 
 /* --- CÁC HÀM XỬ LÝ LOGIC --- */
@@ -245,20 +245,7 @@ const filteredProducts = computed(() => {
 
     <!-- Không tìm thấy sản phẩm -->
     <div v-else-if="filteredProducts.length === 0" class="text-center py-12 bg-gray-50 rounded-xl">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-16 w-16 mx-auto text-gray-400 mb-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
+      <Frown :size="48" class="mx-auto text-gray-400 mb-4" />
       <p class="text-gray-600 text-lg font-medium">Không tìm thấy sản phẩm phù hợp</p>
       <p class="text-gray-400 text-sm mt-2">
         Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác

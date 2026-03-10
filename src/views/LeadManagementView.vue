@@ -141,8 +141,12 @@ const getStatusColor = (status: string) => {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
-              <tr v-for="lead in filteredLeads" :key="lead.id" class="hover:bg-slate-50 transition-colors">
-                <td class="p-4 font-mono text-slate-400 text-xs">#{{ lead.id }}</td>
+              <tr
+                v-for="lead in filteredLeads"
+                :key="lead.id"
+                class="hover:bg-slate-50 transition-colors"
+              >
+                <td class="p-4 font-mono font-bold text-pink-600 text-sm">#{{ lead.id }}</td>
                 <td class="p-4 font-bold">{{ lead.name }}</td>
                 <td class="p-4 text-sm">{{ lead.phone }}</td>
                 <td class="p-4 text-sm text-slate-500">{{ lead.source }}</td>

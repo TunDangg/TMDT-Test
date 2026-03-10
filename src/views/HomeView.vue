@@ -10,6 +10,7 @@ import { useCartStore } from '@/stores/cart' // Import kho quản lý giỏ hàn
 import { useSearchStore } from '@/stores/search' // Import kho quản lý tìm kiếm (Pinia)
 import { useToast } from 'vue-toastification' // Thư viện hiển thị thông báo "pop-up" nhanh
 import { Products } from '@/types' // Import kiểu dữ liệu Product
+import { Zap, ArrowRight, TrendingUp } from 'lucide-vue-next'
 
 /* --- ĐỊNH NGHĨA TYPES --- */
 interface BackendInfo {
@@ -64,6 +65,13 @@ const handleAddToCart = async (product: Products) => {
   }
 }
 
+const scrollToProducts = () => {
+  const productSection = document.getElementById('product-list')
+  if (productSection) {
+    productSection.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
 // 'watch' theo dõi ô tìm kiếm - tự động reset category về "Tất cả" khi tìm kiếm
 watch(
   () => searchStore.searchQuery,
@@ -102,19 +110,91 @@ const filteredProducts = computed(() => {
   // Backend đã trả về kết quả tìm kiếm rồi, nhưng lọc thêm theo category
   if (searchStore.searchQuery.trim()) {
     const query = searchStore.searchQuery.toLowerCase()
-    filtered = filtered.filter((p) =>
-      p.name.toLowerCase().includes(query) ||
-      (p.description && p.description.toLowerCase().includes(query))
+    filtered = filtered.filter(
+      (p) =>
+        p.name.toLowerCase().includes(query) ||
+        (p.description && p.description.toLowerCase().includes(query)),
     )
   }
 
   return filtered
 })
-
-
 </script>
 
 <template>
+  <section class="relative bg-white py-16 lg:py-24 overflow-hidden">
+    <div
+      class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-pink-50 rounded-full blur-3xl opacity-50"
+    ></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+        <div class="flex-1 text-center lg:text-left">
+          <div
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-100 text-pink-600 mb-6"
+          >
+            <Zap :size="14" class="fill-current" />
+            <span class="text-xs font-bold uppercase tracking-widest"
+              >Giao hàng siêu tốc trong 15 phút</span
+            >
+          </div>
+
+          <h1 class="text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-6">
+            Thưởng thức món ngon <br />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-600">
+              Trọn vẹn hương vị
+            </span>
+          </h1>
+
+          <p class="text-lg text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            Khám phá thực đơn đa dạng từ Burger, Pizza đến những món tráng miệng ngọt ngào. Đồ ăn
+            luôn nóng hổi và sẵn sàng phục vụ bạn mọi lúc.
+          </p>
+
+          <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+            <button
+              @click="scrollToProducts"
+              class="group px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-2xl font-bold shadow-lg shadow-pink-200 transition-all flex items-center gap-2"
+            >
+              Đặt món ngay
+              <ArrowRight :size="18" class="group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              class="px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold hover:bg-slate-50 transition-all"
+            >
+              Xem khuyến mãi
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 relative">
+          <div class="relative w-full max-w-lg mx-auto">
+            <img
+              src="https://upload.urbox.vn/strapi/large_Jollibee_003_b6c3642178.jpg"
+              alt="Delicious Burger"
+              class="rounded-[3rem] shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500 object-cover h-[450px] w-full border-8 border-white"
+            />
+
+            <div
+              class="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl shadow-xl flex items-center gap-4 border border-pink-50"
+            >
+              <div
+                class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center"
+              >
+                <TrendingUp :size="24" />
+              </div>
+              <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                  Bán chạy nhất
+                </p>
+                <p class="text-sm font-bold text-slate-800">Gà Rán Jolibee</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
   <div class="home">
     <div
       v-if="backendInfo"
@@ -127,9 +207,13 @@ const filteredProducts = computed(() => {
     </div>
 
     <!-- Hiển thị thông tin tìm kiếm nếu đang search -->
-    <div v-if="searchStore.searchQuery.trim()" class="mb-4 flex items-center gap-3 bg-orange-50 p-3 rounded-lg">
+    <div
+      v-if="searchStore.searchQuery.trim()"
+      class="mb-4 flex items-center gap-3 bg-orange-50 p-3 rounded-lg"
+    >
       <span class="text-gray-700">
-        Kết quả tìm kiếm cho: <strong class="text-orange-600">"{{ searchStore.searchQuery }}"</strong>
+        Kết quả tìm kiếm cho:
+        <strong class="text-orange-600">"{{ searchStore.searchQuery }}"</strong>
       </span>
       <button
         @click="searchStore.searchQuery = ''"
@@ -139,7 +223,7 @@ const filteredProducts = computed(() => {
       </button>
     </div>
 
-    <div class="flex gap-4 mb-6">
+    <div id="product-list" class="flex gap-4 mb-6">
       <button
         v-for="cat in categories"
         :key="cat"
@@ -153,20 +237,35 @@ const filteredProducts = computed(() => {
 
     <!-- Loading state -->
     <div v-if="isLoading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"
+      ></div>
       <p class="mt-4 text-gray-600">Đang tải sản phẩm...</p>
     </div>
 
     <!-- Không tìm thấy sản phẩm -->
     <div v-else-if="filteredProducts.length === 0" class="text-center py-12 bg-gray-50 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-16 w-16 mx-auto text-gray-400 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
       </svg>
       <p class="text-gray-600 text-lg font-medium">Không tìm thấy sản phẩm phù hợp</p>
-      <p class="text-gray-400 text-sm mt-2">Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác</p>
+      <p class="text-gray-400 text-sm mt-2">
+        Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác
+      </p>
       <button
         v-if="searchStore.searchQuery.trim() || selectedCategory !== 'Tất cả'"
-        @click="searchStore.searchQuery = ''; selectedCategory = 'Tất cả'"
+        @click="((searchStore.searchQuery = ''), (selectedCategory = 'Tất cả'))"
         class="mt-4 bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition"
       >
         Xem tất cả sản phẩm

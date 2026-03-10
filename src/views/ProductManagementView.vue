@@ -177,11 +177,11 @@ const deleteProduct = async (productId: number) => {
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
               <tr
-                v-for="item in filteredProducts"
+                v-for="(item, index) in filteredProducts"
                 :key="item.id"
                 class="hover:bg-slate-50/80 transition-colors"
               >
-                <td class="p-4 font-mono text-slate-400 text-xs">#00{{ item.id }}</td>
+                <td class="p-4 font-mono font-bold text-pink-600 text-sm">#{{ index + 1 }}</td>
                 <td class="p-4">
                   <img
                     :src="item.image_url || 'https://via.placeholder.com/50'"

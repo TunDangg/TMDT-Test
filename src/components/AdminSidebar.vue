@@ -2,7 +2,7 @@
   <aside class="w-72 bg-slate-900 text-slate-300 min-h-screen shadow-xl flex flex-col shrink-0">
     <div class="p-8 border-b border-slate-800/50">
       <h2 class="text-2xl font-black text-white tracking-tighter">
-        TMDT <span class="text-pink-500 italic font-medium">Admin</span>
+        EDTEXCO <span class="text-pink-500 italic font-medium">Admin</span>
       </h2>
     </div>
 

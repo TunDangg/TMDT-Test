@@ -5,6 +5,7 @@ import { useCartStore } from './stores/cart'
 import CartSidebar from './components/CartSidebar.vue'
 import { useSearchStore } from './stores/search'
 import { useToast } from 'vue-toastification'
+import { ShieldCheck, UserCircle, ShoppingCart,ShoppingBasket,LogOut } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 const cart = useCartStore()
@@ -136,12 +137,22 @@ const logout = () => {
             class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[60] overflow-hidden animate-in fade-in zoom-in duration-200"
           >
             <RouterLink
-              v-if= "userRole === 'admin'"
+              v-if="userRole === 'admin'"
               to="/admin"
               @click="closeUserMenu"
               class="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
-              <span>⚙️</span> <span class="font-medium">Trang Quản Trị</span>
+              <ShieldCheck :size="18" class="text-orange-500" />
+              <span class="font-medium">Trang Quản Trị</span>
+            </RouterLink>
+
+            <RouterLink
+              to="/profile"
+              @click="closeUserMenu"
+              class="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+            >
+              <UserCircle :size="18" class="text-orange-500" />
+              <span class="font-medium">Hồ Sơ Cá Nhân</span>
             </RouterLink>
 
             <RouterLink
@@ -149,7 +160,8 @@ const logout = () => {
               @click="closeUserMenu"
               class="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
-              <span>🛍️</span> <span class="font-medium">Đơn hàng của tôi</span>
+              <ShoppingBasket :size="18" class="text-orange-500" />
+              <span class="font-medium">Đơn hàng của tôi</span>
             </RouterLink>
 
             <div class="border-t border-gray-100 my-1"></div>
@@ -163,7 +175,8 @@ const logout = () => {
               "
               class="flex items-center gap-3 w-full px-4 py-2 text-red-600 hover:bg-red-50 transition-colors font-semibold text-left"
             >
-              <span>🚪</span> <span>Đăng Xuất</span>
+              <LogOut :size="18" class="text-red-500" />
+              <span>Đăng Xuất</span>
             </button>
           </div>
         </div>
@@ -179,6 +192,7 @@ const logout = () => {
           @click="isCartOpen = true"
           class="relative cursor-pointer group flex items-center gap-2 bg-orange-100 px-3 py-1.5 rounded-full hover:bg-orange-200 transition-colors"
         >
+          <ShoppingCart :size="18" class="text-orange-600 group-hover:text-orange-700 transition-colors" />
           <span class="text-orange-700">Giỏ Hàng</span>
           <span
             class="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"

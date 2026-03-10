@@ -5,7 +5,7 @@ import { useCartStore } from './stores/cart'
 import CartSidebar from './components/CartSidebar.vue'
 import { useSearchStore } from './stores/search'
 import { useToast } from 'vue-toastification'
-import { ShieldCheck, UserCircle, ShoppingCart,ShoppingBasket,LogOut } from 'lucide-vue-next'
+import { ShieldCheck, UserCircle, ShoppingCart, ShoppingBasket, LogOut, User, Search, CircleX } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 const cart = useCartStore()
@@ -42,7 +42,7 @@ const logout = () => {
 </script>
 
 <template>
-  <header class="bg-white shadow-md sticky top-0 z-50">
+  <header v-if="!$route.path.startsWith('/admin')" class="bg-white shadow-md sticky top-0 z-50">
     <nav class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-2 shrink-0">
         <RouterLink to="/" class="cursor-pointer hover:opacity-80 transition-opacity">
@@ -51,22 +51,7 @@ const logout = () => {
       </div>
 
       <div class="grow max-w-xl relative">
-        <!-- Icon tìm kiếm bên trái -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-
+        <Search :size="18" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
           v-model="searchStore.searchQuery"
           type="text"
@@ -81,18 +66,7 @@ const logout = () => {
           @click="searchStore.searchQuery = ''"
           class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 transition"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clip-rule="evenodd"
-            />
-          </svg>
+          <CircleX :size="18" />
         </button>
       </div>
 
@@ -102,18 +76,8 @@ const logout = () => {
             @click="isUserMenuOpen = !isUserMenuOpen"
             class="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full cursor-pointer hover:bg-green-100 transition-all border border-green-200"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 text-green-600"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <User :size="18" class="text-green-500" />
+
             <span class="text-green-700 font-bold">{{ username }}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"

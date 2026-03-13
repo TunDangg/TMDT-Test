@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Patch, Param } from '@nestjs/common';
 import { LeadsService } from './leads.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { LeadStatus} from './entities/lead.entity';
@@ -26,13 +26,13 @@ export class LeadsController {
   }
 
   // Xóa lead
-  @Patch(':id/delete')
+  @Delete(':id')
   remove(@Param('id') id: string) {
     return this.leadsService.remove(+id);
   }
 
   // Cập nhật trạng thái hoặc ghi chú của lead
-  @Patch(':id')
+  @Patch(':id/status')
   updateStatus(
     @Param('id') id: string,
     @Body('status') status: LeadStatus,

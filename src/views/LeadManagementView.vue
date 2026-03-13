@@ -6,6 +6,7 @@ import api from '@/services/api'
 import { Lead } from '@/types'
 
 const searchQuery = ref('')
+const selectedStatus = ref('') // Biến để lưu trạng thái lọc
 const toast = useToast()
 
 // Dữ liệu mẫu khách hàng tiềm năng
@@ -25,12 +26,15 @@ onMounted(() => {
 })
 
 const filteredLeads = computed(() => {
-  return leads.value.filter(
-    (lead) =>
+  return leads.value.filter((lead) => {
+    const matchesSearch =
       lead.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      lead.phone.includes(searchQuery.value) ||
-      (lead.email && lead.email.toLowerCase().includes(searchQuery.value.toLowerCase())),
-  )
+      lead.phone.includes(searchQuery.value)
+
+    const matchesStatus = selectedStatus.value === '' || lead.status === selectedStatus.value
+
+    return matchesSearch && matchesStatus
+  })
 })
 
 const newLead = ref({
@@ -152,15 +156,36 @@ const submitLead = async () => {
   }
 }
 
+// Hàm xử lý đổi trạng thái nhanh ngay ngoài bảng
+const updateLeadStatusQuickly = async (lead: Lead, newStatus: string) => {
+  try {
+    // Backend dùng updateData: any nên gửi mỗi status vẫn được
+    await api.patch(`/leads/${lead.id}`, { status: newStatus })
+    toast.success('Đã cập nhật trạng thái nhanh!')
+    await fetchLeads() // Tải lại bảng để đồng bộ dữ liệu
+  } catch (error) {
+    console.error('Lỗi khi cập nhật nhanh trạng thái:', error)
+    toast.error('Có lỗi xảy ra khi cập nhật trạng thái.')
+  }
+}
+
+// Hàm này để tránh lỗi đỏ typescript
+const onStatusChange = (event: Event, lead: Lead) => {
+  const target = event.target as HTMLSelectElement
+  if (target && target.value) {
+    updateLeadStatusQuickly(lead, target.value)
+  }
+}
+
 // Cập nhật lại màu sắc theo key tiếng Anh
 const getStatusColor = (status?: string) => {
   switch (status) {
     case 'NEW':
       return 'bg-blue-100 text-blue-700'
     case 'CONTACTING':
-      return 'bg-blue-100 text-blue-700'
+      return 'bg-purple-100 text-purple-700'
     case 'CONTACTED':
-      return 'bg-yellow-100 text-yellow-700'
+      return 'bg-indigo-100 text-indigo-700'
     case 'CONVERTED':
       return 'bg-green-100 text-green-700'
     case 'LOST':
@@ -187,7 +212,7 @@ const formatDate = (dateString?: Date | string) => {
   <div class="flex w-full bg-slate-50 min-h-screen font-sans">
     <AdminSidebar />
 
-    <main class="flex-1 w-full p-4 sm:p-6 overflow-x-hidden">
+    <main class="flex-1 w-full p-4 sm:p-6 overflow-visible">
       <header class="flex justify-between items-center mb-8">
         <div>
           <h1 class="text-3xl font-bold text-slate-800">Khách hàng tiềm năng (Leads)</h1>
@@ -196,7 +221,7 @@ const formatDate = (dateString?: Date | string) => {
       </header>
 
       <section
-        class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden w-full"
+        class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-visible w-full"
       >
         <div
           class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4"
@@ -208,6 +233,18 @@ const formatDate = (dateString?: Date | string) => {
               placeholder="Tìm kiếm theo tên, số điện thoại khách hàng"
               class="w-full pl-10 pr-4 h-11 border border-slate-200 rounded-xl focus:border-pink-500 outline-none text-sm transition-all"
             />
+            <select
+              v-model="selectedStatus"
+              class="h-11 border border-slate-200 rounded-xl px-4 focus:border-pink-500 outline-none text-sm transition-all cursor-pointer"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="NEW">Mới</option>
+              <option value="CONTACTING">Đang tư vấn</option>
+              <option value="CONTACTED">Đã tư vấn</option>
+              <option value="OPPORTUNITY">Cơ hội</option>
+              <option value="CONVERTED">Đã chốt</option>
+              <option value="LOST">Thất bại</option>
+            </select>
             <button
               class="h-11 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-all"
             >
@@ -222,7 +259,7 @@ const formatDate = (dateString?: Date | string) => {
           </button>
         </div>
 
-        <div class="overflow-x-auto w-full">
+        <div class="w-full overflow-visible">
           <table class="w-full text-left border-collapse min-w-full">
             <thead>
               <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
@@ -231,6 +268,7 @@ const formatDate = (dateString?: Date | string) => {
                 <th class="p-4 font-semibold">Số điện thoại</th>
                 <th class="p-4 font-semibold">Email</th>
                 <th class="p-4 font-semibold">Nguồn</th>
+                <th class="p-4 font-semibold text-center">Ghi chú</th>
                 <th class="p-4 font-semibold text-center">Trạng thái</th>
                 <th class="p-4 font-semibold text-center">Hành động</th>
               </tr>
@@ -239,7 +277,7 @@ const formatDate = (dateString?: Date | string) => {
               <tr
                 v-for="lead in filteredLeads"
                 :key="lead.id"
-                class="hover:bg-slate-50 transition-colors"
+                class="hover:bg-slate-50 transition-colors relative hover:z-50"
               >
                 <td class="p-4 font-mono font-bold text-pink-600 text-sm">#{{ lead.id }}</td>
                 <td class="p-4">
@@ -249,15 +287,56 @@ const formatDate = (dateString?: Date | string) => {
                 <td class="p-4 text-sm">{{ lead.phone }}</td>
                 <td class="p-4 text-sm text-slate-500">{{ lead.email || 'N/A' }}</td>
                 <td class="p-4 text-sm text-slate-500">{{ lead.source }}</td>
-                <td class="p-4 text-center">
-                  <span
+
+                <td class="p-4 text-sm text-slate-500 max-w-[250px] align-center relative">
+                  <div v-if="lead.notes" class="group/tooltip inline-block w-full cursor-help">
+                    <div
+                      class="bg-slate-50 px-3 py-2 rounded-lg border border-slate-100 text-xs truncate w-full"
+                    >
+                      {{ lead.notes }}
+                    </div>
+
+                    <div
+                      class="invisible opacity-0 group-hover/tooltip:visible group-hover/tooltip:opacity-100 transition-all duration-200 absolute z-[99999] w-72 p-4 bg-white text-slate-700 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-slate-100 bottom-[calc(100%-10px)] left-0 pointer-events-none"
+                    >
+                      <div
+                        class="font-bold mb-2 border-b border-slate-100 pb-2 text-pink-500 uppercase tracking-wider text-[10px]"
+                      >
+                        Nhật ký tư vấn
+                      </div>
+
+                      <div
+                        class="leading-relaxed whitespace-pre-wrap break-words text-[13px] text-slate-600"
+                      >
+                        {{ lead.notes }}
+                      </div>
+
+                      <div
+                        class="absolute top-full left-10 border-[8px] border-transparent border-t-white"
+                      ></div>
+                    </div>
+                  </div>
+                  <span v-else class="text-slate-300 italic text-xs">Trống</span>
+                </td>
+
+                <td class="p-4 text-center align-center">
+                  <select
+                    :value="lead.status"
+                    @change="onStatusChange($event, lead)"
                     :class="[
-                      'px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider',
+                      'px-2 py-1.5 min-w-[110px] rounded-full text-[11px] font-bold uppercase tracking-wider outline-none border-none cursor-pointer focus:ring-2 focus:ring-pink-200 transition-all text-center [text-align-last:center] mt-1',
                       getStatusColor(lead.status),
                     ]"
                   >
-                    {{ getStatusLabel(lead.status) }}
-                  </span>
+                    <option value="NEW" class="bg-white text-slate-700">Mới</option>
+                    <option value="CONTACTING" class="bg-white text-slate-700">Đang tư vấn</option>
+                    <option value="CONTACTED" class="bg-white text-slate-700">Đã tư vấn</option>
+                    <option value="OPPORTUNITY" class="bg-white text-slate-700">Cơ hội</option>
+                    <option value="CONVERTED" class="bg-white text-slate-700">Đã chốt</option>
+                    <option value="LOST" class="bg-white text-slate-700 text-center">
+                      Thất bại
+                    </option>
+                  </select>
                 </td>
                 <td class="p-4 text-center whitespace-nowrap">
                   <button

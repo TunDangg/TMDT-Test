@@ -7,6 +7,7 @@ export interface Products {
   image_url?: string;
   category?: string;
   quantity: number;
+  is_active?: boolean;
 }
 
 export interface CartItem {

@@ -4,7 +4,7 @@
 // onMounted: Chạy code ngay sau khi trang web hiển thị xong.
 // watch: Theo dõi một biến, nếu biến đó đổi thì chạy một hành động nào đó.
 import { ref, onMounted, watch, computed } from 'vue' // Import các hàm cốt lõi của Vue 3
-import axios from 'axios' // Thư viện để gọi API (lấy dữ liệu từ server)
+import api from '@/services/api' // Thư viện để gọi API (lấy dữ liệu từ server)
 import ProductCard from '../components/ProductCard.vue' // Import component thẻ sản phẩm để hiển thị
 import { useCartStore } from '@/stores/cart' // Import kho quản lý giỏ hàng (Pinia)
 import { useSearchStore } from '@/stores/search' // Import kho quản lý tìm kiếm (Pinia)
@@ -38,8 +38,8 @@ const fetchProducts = async () => {
   try {
     // Lấy tất cả sản phẩm từ server (không filter ở backend nữa)
     // Frontend sẽ tự filter theo search query và category
-    const resProducts = await axios.get<Products[]>('http://localhost:3000/products')
-    products.value = resProducts.data // Gán dữ liệu nhận được từ server vào biến products
+    const resProducts = await api.get<Products[]>('/products')
+    products.value = resProducts.data.filter(p => p.is_active !== false) // Gán dữ liệu nhận được từ server vào biến products
   } catch (error) {
     console.error('Lỗi khi tải sản phẩm:', error) // Báo lỗi nếu server không phản hồi
     toast.error('Không thể tải danh sách sản phẩm', { timeout: 3000 })
@@ -87,7 +87,7 @@ watch(
 onMounted(async () => {
   try {
     // 1. Lấy thông tin chung từ server (ví dụ: "Chào mừng bạn quay lại")
-    const resInfo = await axios.get('http://localhost:3000')
+    const resInfo = await api.get('/')
     backendInfo.value = resInfo.data
 
     // 2. Sau đó gọi hàm lấy danh sách sản phẩm để hiển thị lên màn hình
@@ -261,7 +261,7 @@ const filteredProducts = computed(() => {
 
     <!-- Danh sách sản phẩm -->
     <div v-else class="flex flex-col lg:flex-row gap-8">
-      <div class="grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div class="grow grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <ProductCard
           v-for="p in filteredProducts"
           :key="p.id"

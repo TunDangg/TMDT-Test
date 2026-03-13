@@ -26,4 +26,7 @@ export class Product {
 
   @CreateDateColumn({ type: 'timestamp' }) // Tự động lưu thời gian tạo khi bản ghi được tạo
   created_at: Date;
+
+  @Column({ default: true })
+  is_active: boolean; // Trạng thái sản phẩm có đang hoạt động hay không
 }

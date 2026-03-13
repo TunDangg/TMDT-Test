@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Products } from '@/types'
+import api from '@/services/api'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
@@ -23,13 +24,8 @@ export const useCartStore = defineStore('cart', {
           return
         }
 
-        const response = await fetch(`http://localhost:3000/cart?userId=${userId}`)
-        if (response.ok) {
-          this.items = await response.json()
-        } else {
-          console.error('Lỗi khi lấy giỏ hàng:', response.statusText)
-          this.items = []
-        }
+        const response = await api.get(`/cart?userId=${userId}`)
+        this.items = response.data
       } catch (error) {
         console.error('Lỗi khi lấy giỏ hàng từ server:', error)
         this.items = []
@@ -46,22 +42,18 @@ export const useCartStore = defineStore('cart', {
           return { success: false, message: 'Vui lòng đăng nhập để thêm vào giỏ hàng' }
         }
 
-        const response = await fetch('http://localhost:3000/cart/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: Number(userId), productId: product.id, quantity }),
+        await api.post(`/cart/add`, {
+          userId: Number(userId),
+          productId: product.id,
+          quantity,
         })
 
-        const result = await response.json()
-        if (response.ok) {
-          await this.fetchCart() // Cập nhật lại state sau khi lưu DB thành công
-          // Always use product name from parameter to ensure it's shown
-          return { success: true, message: `Thêm ${product.name} vào giỏ hàng thành công!` }
-        }
-        return { success: false, message: result.message || 'Lỗi hệ thống' }
-      } catch (error) {
-        console.error('Lỗi khi thêm vào giỏ:', error)
-        return { success: false, message: 'Không thể kết nối đến máy chủ' }
+        await this.fetchCart() // Cập nhật lại state sau khi lưu DB thành công
+        // Always use product name from parameter to ensure it's shown
+        return { success: true, message: `Thêm ${product.name} vào giỏ hàng thành công!` }
+      } catch (error: any) {
+        const message = error.response?.data?.message || 'Không thể kết nối đến máy chủ'
+        return { success: false, message }
       }
     },
 
@@ -71,12 +63,8 @@ export const useCartStore = defineStore('cart', {
         const userId = localStorage.getItem('userId')
         if (!userId) return
 
-        const response = await fetch(`http://localhost:3000/cart/${productId}?userId=${userId}`, {
-          method: 'DELETE',
-        })
-        if (response.ok) {
-          await this.fetchCart()
-        }
+        await api.delete(`/cart/${productId}?userId=${userId}`)
+        await this.fetchCart()
       } catch (error) {
         console.error('Lỗi khi xóa sản phẩm:', error)
       }
@@ -102,7 +90,7 @@ export const useCartStore = defineStore('cart', {
         const userId = localStorage.getItem('userId')
         if (!userId) return
 
-        await fetch(`http://localhost:3000/cart?userId=${userId}`, { method: 'DELETE' })
+        await api.delete(`/cart?userId=${userId}`)
         this.items = []
       } catch (error) {
         console.error('Lỗi khi làm trống giỏ hàng:', error)
@@ -117,17 +105,8 @@ export const useCartStore = defineStore('cart', {
       for (const item of this.items) {
         try {
           // Gọi API để lấy thông tin sản phẩm mới nhất từ server
-          const response = await fetch(`http://localhost:3000/products/${item.id}`)
-
-          if (!response.ok) {
-            invalidItems.push({
-              product: item,
-              reason: 'Sản phẩm không còn tồn tại',
-            })
-            continue
-          }
-
-          const productData = await response.json()
+          const response = await api.get(`/products/${item.id}`)
+          const productData = response.data
 
           // Kiểm tra tồn kho
           if (productData.stock_quantity === 0) {

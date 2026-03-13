@@ -6,4 +6,5 @@ export class CreateProductDto {
   stock_quantity: number;
   category: string;
   image_url: string;
+  is_active?: boolean;
 }

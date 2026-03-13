@@ -4,6 +4,7 @@ import api from '@/services/api'
 import { useToast } from 'vue-toastification'
 import { Products } from '@/types'
 import AdminSidebar from '@/components/AdminSidebar.vue'
+import { Product } from '../../backend/src/products/entities/product.entity'
 
 const searchQuery = ref('')
 const toast = useToast()
@@ -56,6 +57,7 @@ const openEditModal = (product: Products) => {
     image_url: product.image_url || '',
     stock_quantity: product.stock_quantity,
     category: product.category || 'Đồ ăn nhanh',
+    is_active: product.is_active !== false,
   } // Sao chép dữ liệu sản phẩm vào form để sửa
   isProductModalOpen.value = true
 }
@@ -86,6 +88,20 @@ const closeProductModal = () => {
     image_url: '',
     stock_quantity: 0,
     category: 'Đồ ăn nhanh ',
+  }
+}
+
+const toggleProductStatus = async (product: Product) => {
+  try {
+    const newStatus = !product.is_active
+    await api.patch(`/products/${product.id}`, { is_active: newStatus })
+
+    toast.success(`Sản phẩm đã được ${newStatus ? 'mở bán lại' : 'vô hiệu hóa'} thành công`, {
+      timeout: 3000,
+    })
+    await fetchProducts()
+  } catch (error) {
+    toast.error('Có lỗi xảy ra. Vui lòng thử lại.', { timeout: 3000 })
   }
 }
 
@@ -172,6 +188,7 @@ const deleteProduct = async (productId: number) => {
                 <th class="p-4 font-semibold text-center">Mô tả</th>
                 <th class="p-4 font-semibold text-right">Giá</th>
                 <th class="p-4 font-semibold text-center">Tồn kho</th>
+                <th class="p-4 font-semibold text-center">Trạng thái</th>
                 <th class="p-4 font-semibold text-center">Hành động</th>
               </tr>
             </thead>
@@ -202,6 +219,24 @@ const deleteProduct = async (productId: number) => {
                   <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-semibold"
                     >{{ item.stock_quantity }} cái</span
                   >
+                </td>
+                <td class="p-4 text-center">
+                  <button
+                    @click="toggleProductStatus(item)"
+                    :class="item.is_active !== false ? 'bg-green-500' : 'bg-slate-300'"
+                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none"
+                  >
+                    <span
+                      :class="item.is_active !== false ? 'translate-x-6' : 'translate-x-1'"
+                      class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300"
+                    />
+                  </button>
+                  <div
+                    class="text-[10px] mt-1 font-bold uppercase tracking-wider"
+                    :class="item.is_active !== false ? 'text-green-600' : 'text-slate-400'"
+                  >
+                    {{ item.is_active !== false ? 'Đang bán' : 'Đã đóng' }}
+                  </div>
                 </td>
                 <td class="p-4 text-center whitespace-nowrap">
                   <button
@@ -253,7 +288,7 @@ const deleteProduct = async (productId: number) => {
             class="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50"
           >
             <h3 class="text-xl font-bold text-slate-800">
-              {{ isEditMode ? '📝 Cập nhật món ăn' : '🍱 Thêm món ăn mới' }}
+              {{ isEditMode ? 'Cập nhật món ăn' : 'Thêm món ăn mới' }}
             </h3>
             <button @click="closeProductModal" class="text-slate-400 hover:text-slate-600 text-3xl">
               &times;

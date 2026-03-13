@@ -1,44 +1,35 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AdminSidebar from '@/components/AdminSidebar.vue'
-
+import { useToast } from 'vue-toastification'
+import api from '@/services/api'
+import { Lead } from '@/types'
 
 const searchQuery = ref('')
+const toast = useToast()
 
 // Dữ liệu mẫu khách hàng tiềm năng
-const leads = ref([
-  {
-    id: 101,
-    name: 'Nguyễn Văn A',
-    phone: '0987654321',
-    email: 'nva@gmail.com',
-    status: 'Mới',
-    source: 'Facebook',
-  },
-  {
-    id: 102,
-    name: 'Trần Thị B',
-    phone: '0912345678',
-    email: 'ttb@gmail.com',
-    status: 'Đang tư vấn',
-    source: 'Website',
-  },
-  {
-    id: 103,
-    name: 'Lê Văn C',
-    phone: '0909090909',
-    email: 'lvc@gmail.com',
-    status: 'Đã chốt',
-    source: 'Giới thiệu',
-  },
-])
+const leads = ref<Lead[]>([])
+
+const fetchLeads = async () => {
+  try {
+    const response = await api.get('/leads')
+    leads.value = response.data
+  } catch (error) {
+    console.error('Lỗi khi tải danh sách khách hàng tiềm năng:', error)
+  }
+}
+
+onMounted(() => {
+  fetchLeads()
+})
 
 const filteredLeads = computed(() => {
   return leads.value.filter(
     (lead) =>
       lead.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       lead.phone.includes(searchQuery.value) ||
-      lead.email.toLowerCase().includes(searchQuery.value.toLowerCase()),
+      (lead.email && lead.email.toLowerCase().includes(searchQuery.value.toLowerCase())),
   )
 })
 
@@ -47,46 +38,148 @@ const newLead = ref({
   phone: '',
   email: '',
   source: 'Website',
-  status: 'Mới',
+  status: 'NEW',
+  notes: '',
 })
 
+const currentLead = ref<Lead>({
+  name: '',
+  phone: '',
+  email: '',
+  source: 'Website',
+  status: 'NEW',
+  notes: '',
+})
+
+// Thêm một hàm nhỏ để dịch Trạng thái tiếng Anh sang tiếng Việt khi hiển thị ra bảng
+const getStatusLabel = (status?: string) => {
+  const statusMap: Record<string, string> = {
+    NEW: 'Mới',
+    CONTACTING: 'Đang tư vấn',
+    CONTACTED: 'Đã tư vấn',
+    OPPORTUNITY: 'Cơ hội',
+    CONVERTED: 'Đã chốt',
+    LOST: 'Thất bại',
+  }
+  return status ? statusMap[status] : 'Không rõ'
+}
+
 const isModalOpen = ref(false)
+const isDetailModal = ref(false) // Biến để phân biệt modal đang mở là thêm mới hay xem chi tiết
 
 const openLeadModal = () => {
   isModalOpen.value = true
-}
-
-const closeLeadModal = () => {
-  isModalOpen.value = false
-  //Reset form sau khi đóng
+  // Reset lai form them moi khi dong modal
   newLead.value = {
     name: '',
     phone: '',
     email: '',
     source: 'Website',
-    status: 'Mới',
+    status: 'NEW',
+    notes: '',
   }
 }
 
-const submitLead = () => {
-  // Tam thoi push vao mang lead hien tai de test giao dien, sau nay se thay bang API call de them lead vao database
-  const id = Math.floor(Math.random() * 1000)
-  leads.value.push({ id, ...newLead.value })
-  closeLeadModal()
-  // sau nay o giai doan 2 ban se goi api.post('/leads', newLead.value) de them lead vao database, sau do goi lai API de lay danh sach lead moi nhat ve hien thi.
+const closeLeadModal = () => {
+  isModalOpen.value = false
+  // Reset lại form thêm mới khi đóng modal
+  newLead.value = {
+    name: '',
+    phone: '',
+    email: '',
+    source: 'Website',
+    status: 'NEW',
+    notes: '',
+  }
 }
 
-const getStatusColor = (status: string) => {
+const openDetailLeadModal = (lead: Lead) => {
+  // Dung spread operator de clone du lieu
+  currentLead.value = { ...lead }
+  isDetailModal.value = true
+}
+
+const closeDetailLeadModal = () => {
+  isDetailModal.value = false
+}
+
+const updateLead = async () => {
+  try {
+    await api.patch(`/leads/${currentLead.value.id}`, currentLead.value)
+
+    closeDetailLeadModal()
+    await fetchLeads()
+    toast.success('Cập nhật trạng thái khách hàng thành công!')
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái khách hàng:', error)
+    toast.error('Có lỗi xảy ra khi cập nhật trạng thái khách hàng. Vui lòng thử lại.')
+  }
+}
+
+const deleteLead = async (id?: number) => {
+  if (!id) return
+  // Hiển thị hộp thoại xác nhận trước khi xoá
+  if (
+    confirm('Bạn có chắc chắn muốn xoá khách hàng này không? Hành động này không thể hoàn tác.')
+  ) {
+    try {
+      await api.delete(`/leads/${id}`) // Gọi API DELETE
+      await fetchLeads() // Tải lại bảng
+      toast.success('Đã xoá khách hàng thành công!')
+    } catch (error) {
+      console.error('Lỗi khi xoá:', error)
+      toast.error('Xoá thất bại, vui lòng thử lại!')
+    }
+  }
+}
+
+const submitLead = async () => {
+  try {
+    // Goi API luu vao DB
+    await api.post('/leads', newLead.value)
+
+    // Đóng modal
+    closeLeadModal()
+
+    // Tải lại danh sách mới nhất từ Backend
+    await fetchLeads()
+
+    // Hiển thị thông báo thành công
+    toast.success('Thêm khách hàng tiềm năng thành công!')
+  } catch (error) {
+    console.error('Lỗi khi thêm khách hàng tiềm năng:', error)
+    toast.error('Có lỗi xảy ra khi thêm khách hàng tiềm năng. Vui lòng thử lại.')
+  }
+}
+
+// Cập nhật lại màu sắc theo key tiếng Anh
+const getStatusColor = (status?: string) => {
   switch (status) {
-    case 'Mới':
+    case 'NEW':
       return 'bg-blue-100 text-blue-700'
-    case 'Đang tư vấn':
+    case 'CONTACTING':
+      return 'bg-blue-100 text-blue-700'
+    case 'CONTACTED':
       return 'bg-yellow-100 text-yellow-700'
-    case 'Đã chốt':
+    case 'CONVERTED':
       return 'bg-green-100 text-green-700'
+    case 'LOST':
+      return 'bg-red-100 text-red-700'
     default:
       return 'bg-slate-100 text-slate-700'
   }
+}
+
+const formatDate = (dateString?: Date | string) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date) // Hiển thị ngày giờ theo định dạng Việt Nam
 }
 </script>
 
@@ -136,6 +229,7 @@ const getStatusColor = (status: string) => {
                 <th class="p-4 font-semibold">ID</th>
                 <th class="p-4 font-semibold">Họ & Tên</th>
                 <th class="p-4 font-semibold">Số điện thoại</th>
+                <th class="p-4 font-semibold">Email</th>
                 <th class="p-4 font-semibold">Nguồn</th>
                 <th class="p-4 font-semibold text-center">Trạng thái</th>
                 <th class="p-4 font-semibold text-center">Hành động</th>
@@ -148,8 +242,12 @@ const getStatusColor = (status: string) => {
                 class="hover:bg-slate-50 transition-colors"
               >
                 <td class="p-4 font-mono font-bold text-pink-600 text-sm">#{{ lead.id }}</td>
-                <td class="p-4 font-bold">{{ lead.name }}</td>
+                <td class="p-4">
+                  <p class="font-bold">{{ lead.name }}</p>
+                  <p class="text-xs text-slate-400 mt-0.5">{{ formatDate(lead.created_at) }}</p>
+                </td>
                 <td class="p-4 text-sm">{{ lead.phone }}</td>
+                <td class="p-4 text-sm text-slate-500">{{ lead.email || 'N/A' }}</td>
                 <td class="p-4 text-sm text-slate-500">{{ lead.source }}</td>
                 <td class="p-4 text-center">
                   <span
@@ -158,12 +256,22 @@ const getStatusColor = (status: string) => {
                       getStatusColor(lead.status),
                     ]"
                   >
-                    {{ lead.status }}
+                    {{ getStatusLabel(lead.status) }}
                   </span>
                 </td>
                 <td class="p-4 text-center whitespace-nowrap">
-                  <button class="text-blue-500 hover:text-blue-700 mr-3 text-sm font-bold">
+                  <button
+                    @click="openDetailLeadModal(lead)"
+                    class="text-blue-500 hover:text-blue-700 mr-3 text-sm font-bold"
+                  >
                     Chi tiết
+                  </button>
+
+                  <button
+                    @click="deleteLead(lead.id)"
+                    class="text-red-500 hover:text-red-700 text-sm font-bold"
+                  >
+                    Xoá
                   </button>
                 </td>
               </tr>
@@ -189,49 +297,73 @@ const getStatusColor = (status: string) => {
       <!-- Modal thêm lead mới -->
       <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div
-          class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+          class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
           @click="closeLeadModal"
         ></div>
 
         <div
-          class="bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden animate-in fade-in zoom-in duration-300"
+          class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl z-10 overflow-hidden animate-in fade-in zoom-in duration-300 border border-slate-100"
         >
-          <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+          <div
+            class="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50"
+          >
             <h3 class="text-xl font-bold text-slate-800">Thêm khách hàng mới</h3>
-            <button @click="closeLeadModal" class="text-slate-400 hover:text-slate-600 text-2xl">
+            <button @click="closeLeadModal" class="text-slate-400 hover:text-slate-600 text-3xl">
               &times;
             </button>
           </div>
 
-          <form @submit.prevent="submitLead" class="p-6 space-y-4">
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1">Họ và Tên</label>
-              <input
-                v-model="newLead.name"
-                type="text"
-                required
-                class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 outline-none"
-                placeholder="VD: Nguyễn Văn A"
-              />
-            </div>
+          <form @submit.prevent="submitLead" class="p-8 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Họ và Tên</label
+                >
+                <input
+                  v-model="newLead.name"
+                  type="text"
+                  required
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-pink-500 focus:ring-0 outline-none transition-all placeholder:text-slate-300"
+                  placeholder="VD: Nguyễn Văn A"
+                />
+              </div>
 
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1">Số điện thoại</label>
-              <input
-                v-model="newLead.phone"
-                type="text"
-                required
-                class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 outline-none"
-                placeholder="0987..."
-              />
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Nguồn</label>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Số điện thoại</label
+                >
+                <input
+                  v-model="newLead.phone"
+                  type="text"
+                  required
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-pink-500 outline-none transition-all placeholder:text-slate-300"
+                  placeholder="0987654321"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Email</label
+                >
+                <input
+                  v-model="newLead.email"
+                  type="email"
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-pink-500 outline-none transition-all placeholder:text-slate-300"
+                  placeholder="VD: example@email.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Nguồn</label
+                >
                 <select
                   v-model="newLead.source"
-                  class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none"
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-pink-500 outline-none transition-all cursor-pointer text-slate-700"
                 >
                   <option value="Facebook">Facebook</option>
                   <option value="Website">Website</option>
@@ -239,31 +371,166 @@ const getStatusColor = (status: string) => {
                   <option value="Khác">Khác</option>
                 </select>
               </div>
+
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Trạng thái</label>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Trạng thái</label
+                >
                 <select
                   v-model="newLead.status"
-                  class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none"
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-pink-500 outline-none transition-all cursor-pointer text-slate-700"
                 >
-                  <option value="Mới">Mới</option>
-                  <option value="Đang tư vấn">Đang tư vấn</option>
+                  <option value="NEW">Mới</option>
+                  <option value="CONTACTING">Đang tư vấn</option>
+                  <option value="CONTACTED">Đã tư vấn</option>
+                  <option value="OPPORTUNITY">Cơ hội</option>
+                  <option value="CONVERTED">Đã chốt</option>
+                  <option value="LOST">Thất bại</option>
                 </select>
               </div>
             </div>
 
-            <div class="pt-4 flex space-x-3">
+            <div class="pt-4 flex space-x-4">
               <button
                 type="button"
                 @click="closeLeadModal"
-                class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-bold hover:bg-slate-50"
+                class="flex-1 px-6 py-3 border-2 border-slate-100 rounded-2xl text-slate-500 font-bold hover:bg-slate-50 transition-all"
               >
-                Hủy
+                Hủy bỏ
               </button>
               <button
                 type="submit"
-                class="flex-1 px-4 py-2 bg-pink-500 text-white rounded-lg font-bold hover:bg-pink-600 transition-colors shadow-lg shadow-pink-200"
+                class="flex-1 px-6 py-3 bg-pink-500 text-white rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-100"
               >
                 Lưu thông tin
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div v-if="isDetailModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div
+          class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+          @click="closeDetailLeadModal"
+        ></div>
+
+        <div
+          class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl z-10 overflow-hidden animate-in fade-in zoom-in duration-300 border border-slate-100"
+        >
+          <div
+            class="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50"
+          >
+            <h3 class="text-xl font-bold text-slate-800">Chi tiết Khách hàng</h3>
+            <button
+              @click="closeDetailLeadModal"
+              class="text-slate-400 hover:text-slate-600 text-3xl"
+            >
+              &times;
+            </button>
+          </div>
+
+          <form @submit.prevent="updateLead" class="p-8 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Họ và tên</label
+                >
+                <input
+                  v-model="currentLead.name"
+                  type="text"
+                  required
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-blue-500 outline-none transition-all text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Điện thoại</label
+                >
+                <input
+                  v-model="currentLead.phone"
+                  type="text"
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-blue-500 outline-none transition-all text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Email</label
+                >
+                <input
+                  v-model="currentLead.email"
+                  type="email"
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-blue-500 outline-none transition-all text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Nguồn</label
+                >
+                <select
+                  v-model="currentLead.source"
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-blue-500 outline-none transition-all cursor-pointer text-slate-800"
+                >
+                  <option value="Facebook">Facebook</option>
+                  <option value="Website">Website</option>
+                  <option value="Zalo">Zalo</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                  >Cập nhật Trạng thái</label
+                >
+                <select
+                  v-model="currentLead.status"
+                  class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-blue-500 outline-none transition-all cursor-pointer text-slate-800"
+                >
+                  <option value="NEW">Mới</option>
+                  <option value="CONTACTING">Đang tư vấn</option>
+                  <option value="CONTACTED">Đã tư vấn</option>
+                  <option value="OPPORTUNITY">Cơ hội</option>
+                  <option value="CONVERTED">Đã chốt</option>
+                  <option value="LOST">Thất bại</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-sm font-bold text-slate-700 mb-2 tracking-wide text-xs uppercase"
+                >Nhật ký tư vấn (Ghi chú)</label
+              >
+              <textarea
+                v-model="currentLead.notes"
+                rows="3"
+                class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:border-blue-500 outline-none transition-all resize-none placeholder:text-slate-300"
+                placeholder="VD: Đã gọi lúc 10h, khách hẹn mai gọi lại..."
+              ></textarea>
+            </div>
+
+            <div class="pt-4 flex space-x-4">
+              <button
+                type="button"
+                @click="closeDetailLeadModal"
+                class="flex-1 px-6 py-3 border-2 border-slate-100 rounded-2xl text-slate-500 font-bold hover:bg-slate-50 transition-all"
+              >
+                Đóng
+              </button>
+              <button
+                type="submit"
+                class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+              >
+                Cập nhật thay đổi
               </button>
             </div>
           </form>

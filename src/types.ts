@@ -40,3 +40,15 @@ export interface Order {
   created_at: Date;
   items?: OrderItem[]; // Mối quan hệ một-nhiều với OrderItem
 }
+
+export interface Lead {
+  id?: number;
+  name: string;
+  phone: string;
+  email: string;
+  source?: string;
+  status?: 'NEW' | 'CONTACTING' | 'CONTACTED' | 'OPPORTUNITY' | 'CONVERTED' | 'LOST';
+  notes?: string;
+  created_at?: Date;
+  updated_at?: Date;
+}

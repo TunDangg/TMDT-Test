@@ -16,6 +16,7 @@ import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { ProductsService } from './products/products.service';
+import { LeadsModule } from './leads/leads.module';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { ProductsService } from './products/products.service';
     AuthModule, // module này ở đây để nest biết có chức năng xác thực ng dùng
     CartModule, // module này ở đây để nest biết có chức năng quản lý giỏ hàng
     OrdersModule, // module này ở đây để nest biết có chức năng xác thực ng dùng
-    TypeOrmModule.forFeature([Product, Order, User]),
+    TypeOrmModule.forFeature([Product, Order, User]), LeadsModule,
   ],
   controllers: [AppController],
   providers: [AppService, ProductsService],

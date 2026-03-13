@@ -55,19 +55,6 @@ const currentLead = ref<Lead>({
   notes: '',
 })
 
-// Thêm một hàm nhỏ để dịch Trạng thái tiếng Anh sang tiếng Việt khi hiển thị ra bảng
-const getStatusLabel = (status?: string) => {
-  const statusMap: Record<string, string> = {
-    NEW: 'Mới',
-    CONTACTING: 'Đang tư vấn',
-    CONTACTED: 'Đã tư vấn',
-    OPPORTUNITY: 'Cơ hội',
-    CONVERTED: 'Đã chốt',
-    LOST: 'Thất bại',
-  }
-  return status ? statusMap[status] : 'Không rõ'
-}
-
 const isModalOpen = ref(false)
 const isDetailModal = ref(false) // Biến để phân biệt modal đang mở là thêm mới hay xem chi tiết
 

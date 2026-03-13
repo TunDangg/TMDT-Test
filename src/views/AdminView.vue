@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 import {
@@ -14,6 +14,13 @@ import {
   Loader2,
   TrendingUp,
   ChevronRight,
+  Target,
+  Users,
+  PhoneCall,
+  MessageSquare,
+  Star,
+  ThumbsUp,
+  ThumbsDown,
 } from 'lucide-vue-next'
 
 const stats = ref({
@@ -25,6 +32,19 @@ const stats = ref({
   shipped: 0,
   completed: 0,
   cancelled: 0,
+})
+
+const leadStats = computed(() => {
+  const leads = rawLeads.value
+  return {
+    total: leads.length,
+    NEW: leads.filter((l) => l.status === 'NEW').length,
+    CONTACTING: leads.filter((l) => l.status === 'CONTACTING').length,
+    CONTACTED: leads.filter((l) => l.status === 'CONTACTED').length,
+    OPPORTUNITY: leads.filter((l) => l.status === 'OPPORTUNITY').length,
+    CONVERTED: leads.filter((l) => l.status === 'CONVERTED').length,
+    LOST: leads.filter((l) => l.status === 'LOST').length,
+  }
 })
 
 const isLoading = ref(true)
@@ -58,11 +78,50 @@ const getStatusColorClass = (key: string) => {
   return colors[key] || 'text-slate-400 bg-slate-50'
 }
 
+// Hàm lấy icon tương ứng với trạng thái Lead
+const getLeadStatusIcon = (key: string) => {
+  switch (key) {
+    case 'NEW':
+      return Users
+    case 'CONTACTING':
+      return PhoneCall
+    case 'CONTACTED':
+      return MessageSquare
+    case 'OPPORTUNITY':
+      return Star
+    case 'CONVERTED':
+      return ThumbsUp
+    case 'LOST':
+      return ThumbsDown
+    default:
+      return Target
+  }
+}
+
+const getLeadStatusColorClass = (key: string) => {
+  const colors: Record<string, string> = {
+    NEW: 'text-blue-500 bg-blue-50',
+    CONTACTING: 'text-purple-500 bg-purple-50',
+    CONTACTED: 'text-indigo-500 bg-indigo-50',
+    OPPORTUNITY: 'text-amber-500 bg-amber-50',
+    CONVERTED: 'text-green-500 bg-green-50',
+    LOST: 'text-red-500 bg-red-50',
+  }
+  return colors[key] || 'text-slate-400 bg-slate-50'
+}
+
+const rawLeads = ref<any[]>([])
+
 const fetchStats = async () => {
   isLoading.value = true
   try {
-    const response = await api.get('/admin/stats')
-    stats.value = response.data
+    // Gọi song song 2 API để lấy số liệu thống kê đơn hàng và khách tiềm năng
+    const [statsResponse, leadStatsResponse] = await Promise.all([
+      api.get('/admin/stats'),
+      api.get('leads'),
+    ])
+    stats.value = statsResponse.data
+    rawLeads.value = leadStatsResponse.data
   } catch (error) {
     console.error('Lỗi khi tải số liệu thống kê:', error)
   } finally {
@@ -103,7 +162,7 @@ onMounted(() => {
         </button>
       </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-10">
         <div
           class="relative overflow-hidden bg-gradient-to-br from-pink-500 to-rose-600 p-8 rounded-[2rem] shadow-xl shadow-pink-200 text-white"
         >
@@ -131,6 +190,12 @@ onMounted(() => {
             <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Tổng đơn hàng</p>
             <h3 class="text-4xl font-black text-slate-800 mt-2">{{ stats.totalOrders }}</h3>
           </div>
+          <button
+            @click="$router.push('/admin/orders')"
+            class="flex items-center text-slate-400 text-xs font-bold mt-4 hover:text-pink-500 transition-colors"
+          >
+            Quản lý đơn hàng <ChevronRight :size="14" class="ml-1" />
+          </button>
         </div>
 
         <div
@@ -153,6 +218,59 @@ onMounted(() => {
           >
             Quản lý sản phẩm <ChevronRight :size="14" class="ml-1" />
           </button>
+        </div>
+
+        <div
+          class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between group hover:border-purple-200 transition-all"
+        >
+          <div>
+            <div
+              class="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mb-4"
+            >
+              <Target :size="24" />
+            </div>
+            <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Khách tiềm năng</p>
+            <h3 class="text-4xl font-black text-slate-800 mt-2">{{ leadStats.total }}</h3>
+          </div>
+          <button
+            @click="$router.push('/admin/leads')"
+            class="flex items-center text-slate-400 text-xs font-bold mt-4 hover:text-pink-500 transition-colors"
+          >
+            Quản lý Leads <ChevronRight :size="14" class="ml-1" />
+          </button>
+        </div>
+      </div>
+      <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
+        Trạng thái Khách tiềm năng
+      </h2>
+
+      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-10">
+        <div
+          v-for="(val, key) in {
+            NEW: 'Mới',
+            CONTACTING: 'Đang tư vấn',
+            CONTACTED: 'Đã tư vấn',
+            OPPORTUNITY: 'Cơ hội',
+            CONVERTED: 'Đã chốt',
+            LOST: 'Thất bại',
+          }"
+          :key="key"
+          class="group bg-white p-6 rounded-2xl border border-slate-100 hover:border-purple-200 hover:shadow-lg hover:shadow-purple-50 transition-all cursor-default"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <p
+              class="text-[10px] font-black uppercase tracking-tighter text-slate-400 group-hover:text-purple-400 transition-colors"
+            >
+              {{ val }}
+            </p>
+            <div :class="getLeadStatusColorClass(key)" class="p-2 rounded-lg transition-colors">
+              <component :is="getLeadStatusIcon(key)" :size="16" />
+            </div>
+          </div>
+          <p class="text-3xl font-black text-slate-700">
+            {{ leadStats[key as keyof typeof leadStats] }}
+          </p>
         </div>
       </div>
 

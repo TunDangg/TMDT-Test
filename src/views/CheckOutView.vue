@@ -11,20 +11,20 @@ const toast = useToast()
 const router = useRouter()
 const isValidating = ref(false)
 const isShowQR = ref(false)
-const userId = 1; // Giả sử userId là 1, bạn có thể thay đổi tùy theo logic đăng nhập của bạn
+const userId = 1 // Giả sử userId là 1, bạn có thể thay đổi tùy theo logic đăng nhập của bạn
 const infoKey = `customer_info_${userId}` // Key riêng cho từng user để tránh ghi đè thông tin
 
-const Payment_Info = {
-  BANK_ID: 'MB',
-  ACCOUNT_NUMBER: 'KhongLamMaDoiCoAn',
-  ACCOUNT_NAME: 'Trần Tuấn Đăng',
-}
+// Lấy thông tin thanh toán từ file .env
+const bankId = import.meta.env.VITE_BANK_ID || 'MB'
+const accountNo = import.meta.env.VITE_BANK_ACCOUNT_NO || ''
+const accountName = import.meta.env.VITE_BANK_ACCOUNT_NAME || ''
+const qrTemplate = import.meta.env.VITE_VIETQR_TEMPLATE || 'compact'
 
 const generateQRUrl = () => {
   const amount = cart.totalPrice // lay tu pinia store
   const addInfo = encodeURIComponent(`Thanh toán đơn hàng ${Date.now()}`)
 
-  return `https://img.vietqr.io/image/${Payment_Info.BANK_ID}-${Payment_Info.ACCOUNT_NUMBER}-compact.png?amount=${amount}&addInfo=${addInfo}&accountName=${encodeURIComponent(Payment_Info.ACCOUNT_NAME)}`
+  return `https://img.vietqr.io/image/${bankId}-${accountNo}-${qrTemplate}.png?amount=${amount}&addInfo=${addInfo}&accountName=${encodeURIComponent(accountName)}`
 }
 
 const form = ref({
@@ -86,7 +86,9 @@ const confirmPayment = async () => {
     }, 1000)
   } catch (error: unknown) {
     console.error('Lỗi khi đặt hàng:', error)
-    const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!'
+    const errorMessage =
+      (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+      'Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!'
     toast.error(errorMessage, { timeout: 5000 })
   }
 }
@@ -95,9 +97,9 @@ const confirmPayment = async () => {
 watch(
   form,
   (newVal) => {
-      localStorage.setItem('customer_info', JSON.stringify(newVal))
+    localStorage.setItem('customer_info', JSON.stringify(newVal))
   },
-  {deep: true} // Quan trong: deep giup watch theo doi ca object, khong chi theo doi ca reference
+  { deep: true }, // Quan trong: deep giup watch theo doi ca object, khong chi theo doi ca reference
 )
 
 onMounted(async () => {
@@ -262,15 +264,17 @@ onMounted(async () => {
               >
                 <div class="flex justify-between">
                   <span class="text-gray-500 text-sm font-medium">Ngân hàng:</span>
-                  <span class="text-gray-900 font-bold uppercase">{{ Payment_Info.BANK_ID }}</span>
+                  <span class="text-gray-900 font-bold uppercase">{{ bankId }}</span>
                 </div>
                 <div class="flex justify-between border-t border-gray-200 pt-2 mt-2">
                   <span class="text-gray-500 text-sm font-medium">Số tài khoản:</span>
-                  <span class="text-gray-900 font-bold">{{ Payment_Info.ACCOUNT_NUMBER }}</span>
+                  <span class="text-gray-900 font-bold">{{ accountNo }}</span>
                 </div>
                 <div class="flex justify-between border-t border-gray-200 pt-2 mt-2">
                   <span class="text-gray-500 text-sm font-medium">Chủ tài khoản:</span>
-                  <span class="text-gray-900 font-bold uppercase">{{ Payment_Info.ACCOUNT_NAME }}</span>
+                  <span class="text-gray-900 font-bold uppercase">{{
+                    accountName
+                  }}</span>
                 </div>
                 <div class="flex justify-between border-t border-gray-200 pt-2 mt-2">
                   <span class="text-gray-500 text-sm font-medium">Số tiền:</span>

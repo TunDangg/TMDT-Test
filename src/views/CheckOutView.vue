@@ -15,10 +15,10 @@ const userId = 1 // Giả sử userId là 1, bạn có thể thay đổi tùy th
 const infoKey = `customer_info_${userId}` // Key riêng cho từng user để tránh ghi đè thông tin
 
 // Lấy thông tin thanh toán từ file .env
-const bankId = import.meta.env.VITE_BANK_ID || 'MB'
+const bankId = import.meta.env.VITE_BANK_ID || ''
 const accountNo = import.meta.env.VITE_BANK_ACCOUNT_NO || ''
 const accountName = import.meta.env.VITE_BANK_ACCOUNT_NAME || ''
-const qrTemplate = import.meta.env.VITE_VIETQR_TEMPLATE || 'compact'
+const qrTemplate = import.meta.env.VITE_VIETQR_TEMPLATE || ''
 
 const generateQRUrl = () => {
   const amount = cart.totalPrice // lay tu pinia store

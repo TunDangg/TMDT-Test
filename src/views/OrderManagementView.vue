@@ -119,6 +119,10 @@ const getStatusClass = (status: string) => {
         >
           <div class="flex items-center gap-2 flex-1 min-w-[300px]">
             <div class="relative flex-1">
+              <Search
+                :size="18"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+              />
               <input
                 v-model="searchQuery"
                 type="text"

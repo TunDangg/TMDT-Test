@@ -5,7 +5,21 @@ import { useCartStore } from './stores/cart'
 import CartSidebar from './components/CartSidebar.vue'
 import { useSearchStore } from './stores/search'
 import { useToast } from 'vue-toastification'
-import { ShieldCheck, UserCircle, ShoppingCart, ShoppingBasket, LogOut, User, Search, CircleX } from 'lucide-vue-next'
+import {
+  ShieldCheck,
+  UserCircle,
+  ShoppingCart,
+  ShoppingBasket,
+  LogOut,
+  User,
+  Search,
+  CircleX,
+  Phone,
+  Mail,
+  Facebook,
+  Instagram,
+  Twitter,
+} from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 const cart = useCartStore()
@@ -51,7 +65,10 @@ const logout = () => {
       </div>
 
       <div class="grow max-w-xl relative">
-        <Search :size="18" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Search
+          :size="18"
+          class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+        />
         <input
           v-model="searchStore.searchQuery"
           type="text"
@@ -156,7 +173,10 @@ const logout = () => {
           @click="isCartOpen = true"
           class="relative cursor-pointer group flex items-center gap-2 bg-orange-100 px-3 py-1.5 rounded-full hover:bg-orange-200 transition-colors"
         >
-          <ShoppingCart :size="18" class="text-orange-600 group-hover:text-orange-700 transition-colors" />
+          <ShoppingCart
+            :size="18"
+            class="text-orange-600 group-hover:text-orange-700 transition-colors"
+          />
           <span class="text-orange-700">Giỏ Hàng</span>
           <span
             class="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
@@ -173,4 +193,103 @@ const logout = () => {
   <main :class="$route.path.startsWith('/admin') ? 'w-full' : 'max-w-7xl mx-auto p-6'">
     <RouterView />
   </main>
+
+  <footer class="bg-slate-900 text-slate-300 pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div class="col-span-1">
+          <router-link to="/" class="inline-block mb-6">
+            <img
+              src="https://edtexco.vn/_next/static/media/Logo.644aa387.png"
+              alt="EDTEXCO Logo"
+              class="h-10 w-auto object-contain brightness-0 invert"
+            />
+          </router-link>
+          <p class="text-sm text-slate-400">
+            EDTEXCO Fast Food Store - Nơi hội tụ những hương vị siêu cấp vip pro nhất quả đất!!!
+          </p>
+        </div>
+
+        <div>
+          <h3 class="text-white font-bold mb-6 uppercase tracking-wider text-sm">Khám phá</h3>
+          <ul class="space-y-3 text-sm">
+            <li>
+              <a href="#" class="hover:text-pink-500 transition-colors">Thực đơn món chính</a>
+            </li>
+            <li><a href="#" class="hover:text-pink-500 transition-colors">Combo khuyến mãi</a></li>
+            <li><a href="#" class="hover:text-pink-500 transition-colors">Cửa hàng gần nhất</a></li>
+            <li><a href="#" class="hover:text-pink-500 transition-colors">Tin tức ẩm thực</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-white font-bold mb-6 uppercase tracking-wider text-sm">
+            Hỗ trợ khách hàng
+          </h3>
+          <ul class="space-y-3 text-sm">
+            <li>
+              <a href="#" class="hover:text-pink-500 transition-colors">Chính sách vận chuyển</a>
+            </li>
+            <li>
+              <a href="#" class="hover:text-pink-500 transition-colors">Điều khoản dịch vụ</a>
+            </li>
+            <li>
+              <a href="#" class="hover:text-pink-500 transition-colors">Chính sách bảo mật</a>
+            </li>
+            <li>
+              <a href="#" class="hover:text-pink-500 transition-colors">Câu hỏi thường gặp</a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-white font-bold mb-6 uppercase tracking-wider text-sm">Liên Hệ</h3>
+          <div class="flex gap-4">
+            <a
+              href="https://facebook.com"
+              target="_blank"
+              class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-all duration-300"
+            >
+              <Facebook :size="20" />
+            </a>
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-all duration-300"
+            >
+              <Instagram :size="20" />
+            </a>
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-all duration-300"
+            >
+              <Twitter :size="20" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-6"
+      >
+        <div class="text-xs text-slate-500">
+          <p>© 2026 TMDT-Test. All rights reserved.</p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-6 text-xs font-medium">
+          <div class="flex items-center gap-2 group cursor-pointer">
+            <Phone :size="14" class="text-pink-500 group-hover:scale-110 transition-transform" />
+            <span class="group-hover:text-white transition-colors">0123 456 789</span>
+          </div>
+          <div class="flex items-center gap-2 group cursor-pointer">
+            <Mail :size="14" class="text-pink-500 group-hover:scale-110 transition-transform" />
+            <span class="group-hover:text-white transition-colors"
+              >khongbietnua.12345678@gmail.com</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
 </template>

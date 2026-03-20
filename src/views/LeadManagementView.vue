@@ -4,6 +4,7 @@ import AdminSidebar from '@/components/AdminSidebar.vue'
 import { useToast } from 'vue-toastification'
 import api from '@/services/api'
 import { Lead } from '@/types'
+import { Search } from 'lucide-vue-next'
 
 const searchQuery = ref('')
 const selectedStatus = ref('') // Biến để lưu trạng thái lọc
@@ -214,6 +215,7 @@ const formatDate = (dateString?: Date | string) => {
           class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4"
         >
           <div class="flex items-center gap-2 flex-1 min-w-[300px]">
+            <Search :size="18" class="text-slate-400 absolute ml-3 pointer-events-none" />
             <input
               v-model="searchQuery"
               type="text"

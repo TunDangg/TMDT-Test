@@ -5,6 +5,7 @@ import { useToast } from 'vue-toastification'
 import { Products } from '@/types'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 import { Product } from '../../backend/src/products/entities/product.entity'
+import { Search } from 'lucide-vue-next'
 
 const searchQuery = ref('')
 const toast = useToast()
@@ -158,6 +159,7 @@ const deleteProduct = async (productId: number) => {
           class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4"
         >
           <div class="flex items-center gap-2 flex-1 min-w-[300px]">
+            <Search :size="18" class="text-slate-400 absolute ml-3 pointer-events-none" />
             <input
               v-model="searchQuery"
               type="text"

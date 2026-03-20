@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
+    "ant-design-vue": "^4.0.0-rc.6",
     "axios": "^1.13.3",
     "lucide-vue-next": "^0.577.0",
     "pinia": "^3.0.4",

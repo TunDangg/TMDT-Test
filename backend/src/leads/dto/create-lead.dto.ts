@@ -1,19 +1,24 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { LeadStatus } from '../entities/lead.entity';
 
 export class CreateLeadDto {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Tên không được để trống' })
   @IsString()
   name: string;
 
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
+  @IsString()
+  phone: string;
 
   @IsOptional()
-  @IsString()
-  phone?: string;
+  @IsEmail({}, { message: 'Email không đúng định dạng' })
+  email?: string;
 
   @IsOptional()
   @IsString()
   source?: string;
+
+  @IsOptional()
+  @IsEnum(LeadStatus)
+  status?: LeadStatus;
 }

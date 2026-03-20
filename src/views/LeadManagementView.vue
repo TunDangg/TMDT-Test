@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 import { useToast } from 'vue-toastification'
 import api from '@/services/api'
 import { Lead } from '@/types'
 import { Search } from 'lucide-vue-next'
 
+const router = useRouter()
 const searchQuery = ref('')
 const selectedStatus = ref('') // Biến để lưu trạng thái lọc
 const toast = useToast()
@@ -278,26 +280,38 @@ const formatDate = (dateString?: Date | string) => {
                 <td class="p-4 text-sm text-slate-500">{{ lead.source }}</td>
 
                 <td class="p-4 text-sm text-slate-500 max-w-[250px] align-center relative">
-                  <div v-if="lead.notes" class="group/tooltip inline-block w-full cursor-help">
+                  <div
+                    v-if="lead.activities && lead.activities.length > 0"
+                    class="group/tooltip inline-block w-full cursor-help"
+                  >
                     <div
                       class="bg-slate-50 px-3 py-2 rounded-lg border border-slate-100 text-xs truncate w-full"
                     >
-                      {{ lead.notes }}
+                      {{ lead.activities[0].content }}
                     </div>
 
                     <div
                       class="invisible opacity-0 group-hover/tooltip:visible group-hover/tooltip:opacity-100 transition-all duration-200 absolute z-[99999] w-72 p-4 bg-white text-slate-700 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-slate-100 bottom-[calc(100%-10px)] left-0 pointer-events-none"
                     >
                       <div
-                        class="font-bold mb-2 border-b border-slate-100 pb-2 text-pink-500 uppercase tracking-wider text-[10px] text-center"
+                        class="font-bold mb-2 border-b border-slate-100 pb-2 text-pink-500 uppercase tracking-wider text-[10px] flex justify-between items-center"
                       >
-                        Nhật ký tư vấn
+                        <span>Nhật ký tư vấn mới nhất</span>
+                        <span class="text-slate-400 font-normal lowercase">{{
+                          formatDate(lead.activities[0].created_at)
+                        }}</span>
                       </div>
 
                       <div
-                        class="leading-relaxed whitespace-pre-wrap break-words text-[13px] text-slate-600"
+                        class="leading-relaxed whitespace-pre-wrap break-words text-[13px] text-slate-600 font-medium"
                       >
-                        {{ lead.notes }}
+                        {{ lead.activities[0].content }}
+                      </div>
+
+                      <div
+                        class="mt-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider text-right"
+                      >
+                        Bởi: {{ lead.activities[0].role }}
                       </div>
 
                       <div
@@ -305,7 +319,8 @@ const formatDate = (dateString?: Date | string) => {
                       ></div>
                     </div>
                   </div>
-                  <span v-else class="text-slate-300 italic text-xs">Trống</span>
+
+                  <span v-else class="text-slate-300 italic text-xs">Chưa có nhật ký</span>
                 </td>
 
                 <td class="p-4 text-center align-center">
@@ -329,7 +344,7 @@ const formatDate = (dateString?: Date | string) => {
                 </td>
                 <td class="p-4 text-center whitespace-nowrap">
                   <button
-                    @click="openDetailLeadModal(lead)"
+                    @click="router.push(`/admin/leads/${lead.id}`)"
                     class="text-blue-500 hover:text-blue-700 mr-3 text-sm font-bold"
                   >
                     Chi tiết

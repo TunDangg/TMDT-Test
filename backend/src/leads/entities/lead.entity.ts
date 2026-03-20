@@ -1,4 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { OneToMany } from 'typeorm';
+import { LeadActivity } from './lead-activity.entity';
 
 export enum LeadStatus {
   NEW = 'NEW',
@@ -18,6 +20,9 @@ export class Lead {
   name: string;
 
   @Column()
+  address: string;
+
+  @Column()
   email: string;
 
   @Column({ nullable: true })
@@ -30,14 +35,13 @@ export class Lead {
   @Column({ type: 'enum', enum: LeadStatus, default: LeadStatus.NEW })
   status: LeadStatus;
 
-  // Admin có thể thêm ghi chú về khách hàng
-  @Column({ type: 'text', nullable: true })
-  notes: string;
-
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => LeadActivity, (activity) => activity.lead, { cascade: true })
+  activities: LeadActivity[];
 }
 

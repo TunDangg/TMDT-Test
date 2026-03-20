@@ -44,6 +44,12 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
     },
     {
+      path: '/admin/leads/:id',
+      name: 'admin-lead-detail',
+      component: () => import('../views/LeadDetailView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
       path: '/admin/products',
       name: 'admin-products',
       component: () => import('../views/ProductManagementView.vue'), // Lazy load trang admin products

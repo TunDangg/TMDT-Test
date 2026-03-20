@@ -103,7 +103,7 @@ const getStatusClass = (status: string) => {
   <div class="flex w-full bg-slate-50 min-h-screen font-sans text-slate-900">
     <AdminSidebar />
 
-    <main class="flex-1 w-full p-4 sm:p-6 overflow-x-hidden">
+    <main class="flex-1 w-full p-4 sm:p-6 overflow-visible">
       <header class="flex justify-between items-center mb-8">
         <div>
           <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Quản lý đơn hàng</h1>
@@ -112,7 +112,7 @@ const getStatusClass = (status: string) => {
       </header>
 
       <section
-        class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden w-full"
+        class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-visible w-full"
       >
         <div
           class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4"
@@ -143,7 +143,7 @@ const getStatusClass = (status: string) => {
           </button>
         </div>
 
-        <div class="overflow-x-auto w-full">
+        <div class="w-full overflow-visible">
           <table class="w-full text-left border-collapse min-w-full">
             <thead>
               <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
@@ -151,6 +151,7 @@ const getStatusClass = (status: string) => {
                 <th class="p-4 font-semibold text-center">Thời gian đặt</th>
                 <th class="p-4 font-semibold">Khách hàng</th>
                 <th class="p-4 font-semibold">Địa Chỉ</th>
+                <th class="p-4 font-semibold text-center">Ghi chú</th>
                 <th class="p-4 font-semibold text-right">Tổng tiền</th>
                 <th class="p-4 font-semibold text-center">Trạng thái</th>
                 <th class="p-4 font-semibold text-center">Hành động</th>
@@ -166,7 +167,7 @@ const getStatusClass = (status: string) => {
               <tr
                 v-for="order in filteredOrders"
                 :key="order.id"
-                class="hover:bg-slate-50/80 transition-colors"
+                class="hover:bg-slate-50/80 transition-colors relative hover:z-50"
               >
                 <td class="p-4 font-mono font-bold text-pink-600 text-sm">#ORD{{ order.id }}</td>
 
@@ -186,6 +187,37 @@ const getStatusClass = (status: string) => {
                   </div>
                 </td>
                 <td class="p-4 text-xs text-slate-500">{{ order.customer_address }}</td>
+                <td class="p-4 text-sm text-slate-500 max-w-[220px] align-center relative">
+                  <div v-if="order.note" class="group/tooltip inline-block w-full cursor-help">
+                    <div
+                      class="italic text-yellow-700 bg-yellow-50 px-3 py-2 rounded-lg border border-yellow-100 text-xs truncate w-full"
+                    >
+                      {{ order.note }}
+                    </div>
+
+                    <div
+                      class="invisible opacity-0 group-hover/tooltip:visible group-hover/tooltip:opacity-100 transition-all duration-200 absolute z-[99999] w-72 p-4 bg-white text-slate-700 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-slate-100 bottom-[calc(100%-10px)] left-0 pointer-events-none"
+                    >
+                      <div
+                        class="font-bold mb-2 border-b border-slate-100 pb-2 text-pink-500 uppercase tracking-wider text-[10px] text-center"
+                      >
+                        Ghi chú từ khách hàng
+                      </div>
+
+                      <div
+                        class="leading-relaxed whitespace-pre-wrap break-words text-[13px] text-slate-600 font-medium italic"
+                      >
+                        {{ order.note }}
+                      </div>
+
+                      <div
+                        class="absolute top-full left-10 border-[8px] border-transparent border-t-white"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <span v-else class="text-slate-300 italic text-xs">Trống</span>
+                </td>
                 <td class="p-4 text-right font-bold text-slate-900">
                   {{ Number(order.total_price).toLocaleString() }}đ
                 </td>
@@ -329,6 +361,16 @@ const getStatusClass = (status: string) => {
                   </tr>
                 </tbody>
               </table>
+
+              <div
+                v-if="selectedOrder?.note"
+                class="mb-8 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs font-sans"
+              >
+                <p class="text-[10px] uppercase font-bold text-yellow-700 mb-1">
+                  Ghi chú từ khách hàng:
+                </p>
+                <p class="font-medium text-yellow-900 italic">"{{ selectedOrder.note }}"</p>
+              </div>
 
               <div class="border-t-2 border-slate-900 pt-4 flex flex-col items-end gap-2 font-sans">
                 <div class="flex justify-between w-48 text-xs">

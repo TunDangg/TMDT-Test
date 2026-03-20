@@ -10,6 +10,7 @@ export class CreateOrderDto {
   customer_name: string;
   customer_phone: string;
   customer_address: string;
+  note?: string;
   total_price: number;
 
   // Danh sach cac mon hang ( mang doi tuong OrderItemDto) de gui len khi tao don hang

@@ -24,6 +24,9 @@ export class Order {
   @Column()
   customer_address: string;
 
+  @Column({ type: 'text', nullable: true })
+  note: string;
+
   @Column('decimal', { precision: 10, scale: 2 })
   total_price: number;
 

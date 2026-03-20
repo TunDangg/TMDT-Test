@@ -26,6 +26,7 @@ export class OrdersService {
         customer_name: createOrderDto.customer_name,
         customer_phone: createOrderDto.customer_phone,
         customer_address: createOrderDto.customer_address,
+        note: createOrderDto.note,
         total_price: createOrderDto.total_price,
         status: 'pending', // Mặc định là pending khi tạo mới
       });

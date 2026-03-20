@@ -289,7 +289,7 @@ const formatDate = (dateString?: Date | string) => {
                       class="invisible opacity-0 group-hover/tooltip:visible group-hover/tooltip:opacity-100 transition-all duration-200 absolute z-[99999] w-72 p-4 bg-white text-slate-700 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-slate-100 bottom-[calc(100%-10px)] left-0 pointer-events-none"
                     >
                       <div
-                        class="font-bold mb-2 border-b border-slate-100 pb-2 text-pink-500 uppercase tracking-wider text-[10px]"
+                        class="font-bold mb-2 border-b border-slate-100 pb-2 text-pink-500 uppercase tracking-wider text-[10px] text-center"
                       >
                         Nhật ký tư vấn
                       </div>

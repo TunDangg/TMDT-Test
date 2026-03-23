@@ -75,16 +75,22 @@ export class LeadsService {
   async remove(id: number) {
     return this.leadRepository.delete(id);
   }
-  // // Cap nhat trang thai hoac ghi chu cua lead
-  // async updateStatus(id: number, status: LeadStatus, notes?: string) {
-  //   const lead = await this.leadRepository.findOneBy({ id });
-  //   if (lead) {
-  //     lead.status = status;
-  //     if (notes) {
-  //       lead.notes = notes;
-  //     }
-  //     return this.leadRepository.save(lead);
-  //   }
-  //   return null;
-  // }
+
+  // Cập nhật ghi chú
+  async updateActivity(activityId: number, content: string ): Promise<LeadActivity> {
+    const activity = await this.leadActivityRepository.findOneBy({ id: activityId });
+    if (!activity) {
+      throw new NotFoundException(`không tim thấy ghi chú id ${activityId}`);
+    }
+    activity.content = content;
+    return this.leadActivityRepository.save(activity);
+  }
+
+  // Xoá ghi chú
+  async removeActivity(activityId: number): Promise<void> {
+    const result = await this.leadActivityRepository.delete(activityId);
+    if (result.affected === 0) {
+      throw new NotFoundException(`không tim thấy ghi chú id ${activityId}`);
+    }
+  }
 }

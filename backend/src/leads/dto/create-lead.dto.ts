@@ -14,6 +14,10 @@ export class CreateLeadDto {
   @IsEmail({}, { message: 'Email không đúng định dạng' })
   email?: string;
 
+  @IsString()
+  @IsOptional()
+  address?: string;
+
   @IsOptional()
   @IsString()
   source?: string;

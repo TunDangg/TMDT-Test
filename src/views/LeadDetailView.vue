@@ -17,6 +17,8 @@ import {
   Calendar,
   CheckCircle2,
   ChevronDown,
+  Pencil,
+  Trash2,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -39,6 +41,8 @@ const leadInfo = ref({
 
 const isEditingInfo = ref(false)
 const editForm = ref({ ...leadInfo.value })
+const editingActivityId = ref<number | null>(null)
+const editNoteContent = ref('')
 
 const fetchLeadData = async () => {
   try {
@@ -50,7 +54,7 @@ const fetchLeadData = async () => {
       name: data.name,
       phone: data.phone || 'Chưa cập nhật',
       email: data.email || 'Chưa cập nhật',
-      address: 'Chưa cập nhật',
+      address: data.address || 'Chưa cập nhật',
       source: data.source || 'Website',
       createdAt: new Date(data.created_at).toLocaleDateString('vi-VN'),
       status: data.status,
@@ -112,6 +116,41 @@ const saveEditInfo = async () => {
     console.error('Lỗi khi cập nhật', error)
     toast.error('Lỗi hệ thống, vui lòng thử lại')
   }
+}
+
+// Bắt đầu sửa
+const startEditActivity = (item: any) => {
+  editingActivityId.value = item.id
+  editNoteContent.value = item.content
+}
+
+// Lưu sửa đổi
+const handleUpdateActivity = async (id: number) => {
+  try {
+    await api.patch(`/leads/activities/${id}`, { content: editNoteContent.value })
+    toast.success('Đã cập nhật ghi chú')
+    editingActivityId.value = null
+    await fetchLeadData() // Tải lại danh sách timeline
+  } catch (error) {
+    toast.error('Lỗi khi cập nhật ghi chú')
+  }
+}
+
+// Xóa ghi chú
+const handleDeleteActivity = async (id: number) => {
+  if (!confirm('Bạn có chắc chắn muốn xóa ghi chú này?')) return
+  try {
+    await api.delete(`/leads/activities/${id}`)
+    toast.success('Đã xóa ghi chú')
+    await fetchLeadData()
+  } catch (error) {
+    toast.error('Lỗi khi xóa ghi chú')
+  }
+}
+
+const cancelEditActivity = () => {
+  editingActivityId.value = null
+  editNoteContent.value = ''
 }
 
 const noteContent = ref('')
@@ -375,7 +414,9 @@ onMounted(() => {
               <div class="flex items-start gap-3">
                 <Calendar :size="16" class="text-slate-400 mt-0.5" />
                 <div class="flex-1">
-                  <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Trạng thái</p>
+                  <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">
+                    Trạng thái
+                  </p>
                   <select
                     v-model="editForm.status"
                     class="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm text-slate-800 outline-none transition-all bg-white"
@@ -436,23 +477,65 @@ onMounted(() => {
                     <Phone v-if="item.type === 'call'" :size="10" class="text-white fill-white" />
                   </div>
 
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-sm font-bold text-slate-900">{{ item.time }}</span>
-                    <span
-                      class="px-2 py-0.5 text-[10px] font-extrabold rounded uppercase tracking-tighter"
-                      :class="
-                        item.role === 'Admin'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-slate-100 text-slate-600'
-                      "
-                    >
-                      {{ item.role }}
-                    </span>
+                  <div class="flex items-center justify-between gap-3 mb-1">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-bold text-slate-900">{{ item.time }}</span>
+                      <span
+                        class="px-2 py-0.5 text-[10px] font-extrabold rounded uppercase tracking-tighter"
+                        :class="
+                          item.role === 'Admin'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-slate-100 text-slate-600'
+                        "
+                      >
+                        {{ item.role }}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button
+                        v-if="editingActivityId !== item.id"
+                        @click="startEditActivity(item)"
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      >
+                        <Pencil :size="14" />
+                      </button>
+                      <button
+                        v-if="editingActivityId !== item.id"
+                        @click="handleDeleteActivity(item.id)"
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 :size="14" />
+                      </button>
+                    </div>
                   </div>
+
                   <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 mt-2">
-                    <p class="text-sm text-slate-600 leading-relaxed font-medium">
-                      {{ item.content }}
-                    </p>
+                    <template v-if="editingActivityId === item.id">
+                      <textarea
+                        v-model="editNoteContent"
+                        rows="3"
+                        class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm text-slate-800 outline-none transition-all resize-none"
+                      ></textarea>
+                      <div class="flex justify-end gap-2 mt-3">
+                        <button
+                          @click="cancelEditActivity"
+                          class="px-4 py-2 text-sm font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          @click="handleUpdateActivity(item.id)"
+                          class="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+                        >
+                          Lưu
+                        </button>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <p class="text-sm text-slate-600 leading-relaxed font-medium">
+                        {{ item.content }}
+                      </p>
+                    </template>
                   </div>
                 </div>
               </div>

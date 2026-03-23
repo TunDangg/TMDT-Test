@@ -47,13 +47,15 @@ export class LeadsController {
     return this.leadsService.remove(+id);
   }
 
-  // Cập nhật trạng thái hoặc ghi chú của lead
-  // @Patch(':id/status')
-  // updateStatus(
-  //   @Param('id') id: string,
-  //   @Body('status') status: LeadStatus,
-  //   @Body('notes') notes?: string,
-  // ) {
-  //   return this.leadsService.updateStatus(+id, status, notes);
-  // }
+  // Route cập nhật nội dung ghi chú
+  @Patch('activities/:activityId')
+  updateActivity(@Param('activityId') activityId: string, @Body('content') content: string) {
+    return this.leadsService.updateActivity(+activityId, content);
+  }
+
+  // Route xóa ghi chú
+  @Delete('activities/:activityId')
+  removeActivity(@Param('activityId') activityId: string) {
+    return this.leadsService.removeActivity(+activityId);
+  }
 }

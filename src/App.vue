@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useCartStore } from './stores/cart'
 import CartSidebar from './components/CartSidebar.vue'
@@ -29,6 +29,12 @@ const router = useRouter()
 const toast = useToast()
 const userRole = ref<string | null>(null) // Biến lưu role của user để hiển thị menu admin
 const isUserMenuOpen = ref(false)
+const mainClass = computed(() => {
+  const path = router.currentRoute.value.path
+  if (path.startsWith('/admin')) return 'w-full'
+  if (['/login', '/register'].includes(path)) return 'w-full p-0'
+  return 'max-w-7xl mx-auto p-6'
+})
 
 onMounted(async () => {
   username.value = localStorage.getItem('username')
@@ -56,7 +62,10 @@ const logout = () => {
 </script>
 
 <template>
-  <header v-if="!$route.path.startsWith('/admin')" class="bg-white shadow-md sticky top-0 z-50">
+  <header
+    v-if="!$route.path.startsWith('/admin') && !['/login', '/register'].includes($route.path)"
+    class="bg-white shadow-md sticky top-0 z-50"
+  >
     <nav class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-2 shrink-0">
         <RouterLink to="/" class="cursor-pointer hover:opacity-80 transition-opacity">
@@ -190,11 +199,14 @@ const logout = () => {
 
   <CartSidebar :isOpen="isCartOpen" @close="isCartOpen = false" />
 
-  <main :class="$route.path.startsWith('/admin') ? 'w-full' : 'max-w-7xl mx-auto p-6'">
+  <main :class="mainClass">
     <RouterView />
   </main>
 
-  <footer class="bg-slate-900 text-slate-300 pt-16 pb-8">
+  <footer
+    v-if="!$route.path.startsWith('/admin') && !['/login', '/register'].includes($route.path)"
+    class="bg-slate-900 text-slate-300 pt-16 pb-8"
+  >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
         <div class="col-span-1">

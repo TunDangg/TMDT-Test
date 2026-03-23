@@ -98,7 +98,7 @@ const formatDate = (date: string) => new Date(date).toLocaleDateString('vi-VN')
           <div class="p-3 bg-pink-50 text-pink-500 rounded-xl"><Package /></div>
           <div>
             <p class="font-bold text-slate-800">Đơn hàng #ORD{{ order.id }}</p>
-            <p class="text-xs text-slate-400">{{ formatDate(order.createdAt) }}</p>
+            <p class="text-xs text-slate-400">{{ formatDate(order.created_at) }}</p>
           </div>
         </div>
         <div class="text-right">

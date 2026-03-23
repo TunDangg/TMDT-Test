@@ -15,7 +15,7 @@ export class OrdersService {
     private readonly orderItemRepository: Repository<OrderItem>,
     private dataSource: DataSource, // Dung để quản lý transaction khi tạo đơn hàng và order items
   ) {}
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto, userId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -29,6 +29,7 @@ export class OrdersService {
         note: createOrderDto.note,
         total_price: createOrderDto.total_price,
         status: 'pending', // Mặc định là pending khi tạo mới
+        user: { id: userId },
       });
       const savedOrder = await queryRunner.manager.save(order);
 

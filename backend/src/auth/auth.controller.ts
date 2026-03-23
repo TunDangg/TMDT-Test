@@ -15,7 +15,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('profile') // Đường dẫn sẽ là localhost:3000/auth/profile
   getProfile(@Request() req) {
-    return this.usersService.findProfile(req.user.userId);
+    return this.usersService.findProfile(req.user.sub);
   }
 
   @HttpCode(HttpStatus.OK)

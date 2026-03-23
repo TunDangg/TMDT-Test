@@ -19,9 +19,11 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   // POST /orders - Tạo đơn hàng mới
+  @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  async create( @Request() req, @Body() createOrderDto: CreateOrderDto) {
+    const userId = req.user.sub;
+    return this.ordersService.create(createOrderDto, userId);
   }
 
   // GET /orders - Lấy tất cả đơn hàng
@@ -33,7 +35,7 @@ export class OrdersController {
   @UseGuards(AuthGuard) // Chỉ cho phép người dùng đã đăng nhập mới có quyền xem đơn hàng của mình
   @Get('my-orders')
   async findMyOrders(@Request() req) {
-    const userId = req.user.userId || req.user.id; // Lấy userId từ token đã giải mã
+    const userId = req.user.sub; // Lấy chính xác trường sub từ token
     return this.ordersService.findMyOrders(userId);
   }
 

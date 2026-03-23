@@ -21,6 +21,7 @@ import {
   Twitter,
 } from 'lucide-vue-next'
 
+const cartStore = useCartStore()
 const searchStore = useSearchStore()
 const cart = useCartStore()
 const isCartOpen = ref<boolean>(false)
@@ -56,8 +57,11 @@ const logout = () => {
   username.value = null
   userRole.value = null
   cart.items = [] // Clear giỏ hàng local
+
+  cartStore.clearLocalCart()
+
   toast.success('Đăng xuất thành công!', { timeout: 2000 })
-  router.push('/')
+  router.push('/login')
 }
 </script>
 

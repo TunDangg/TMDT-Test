@@ -40,7 +40,7 @@ export class Order {
   @CreateDateColumn()
   created_at: Date; // Ngày tạo đơn hàng
 
-  @ManyToOne(() => User, (user) => user.orders, { cascade: true })
+  @ManyToOne(() => User, (user) => user.orders)
   @JoinColumn({ name: 'user_id' }) // Tên cột khóa ngoại trong bảng orders
   user: User; // Mối quan hệ nhiều-một với User
 

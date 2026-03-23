@@ -13,6 +13,9 @@ export const useCartStore = defineStore('cart', {
     totalItems: (state) => state.items.reduce((total, item) => total + item.quantity, 0),
   },
   actions: {
+    clearLocalCart() {
+      this.items = []
+    },
     // 1. Lấy giỏ hàng từ Database khi tải trang hoặc đăng nhập
     async fetchCart() {
       this.isLoading = true

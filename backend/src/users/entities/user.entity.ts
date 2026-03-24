@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
 
 export enum UserRole {
@@ -17,6 +17,12 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ nullable: true })
+  email: string;
+
+  @Column({ nullable: true })
+  phone: string;
+
   @Column({
     type: 'enum', // Kiểu enum để giới hạn giá trị role chỉ có 'user' hoặc 'admin'
     enum: UserRole,
@@ -24,7 +30,9 @@ export class User {
   })
   role: UserRole;
 
+  @CreateDateColumn() // Thêm để hiển thị "Ngày gia nhập" trên giao diện
+  created_at: Date;
+
   @OneToMany(() => Order, (order) => order.user) // Mối quan hệ một-nhiều với Order
   orders: Order[]; // Một user có thể có nhiều đơn hàng
-
 }

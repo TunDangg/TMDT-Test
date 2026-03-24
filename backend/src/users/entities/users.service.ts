@@ -38,9 +38,20 @@ export class UsersService {
   async findProfile(id: number) {
     const user = await this.usersRepository.findOne({
       where: { id },
-      select: ['id', 'username', 'role'], // Chỉ lấy các trường cần thiết, không trả về password
+      // Trả về đầy đủ thông tin hồ sơ, không bao gồm password
+      select: ['id', 'username', 'role', 'email', 'phone', 'created_at'],
     });
     if (!user) throw new NotFoundException(`Không tìm thấy user có id là ${id}`);
     return user;
+  }
+
+  async update(id: number, updateData: any): Promise<User> {
+    // Loại bỏ password để tránh việc vô tình ghi đè mật khẩu trắng hoặc sai định dạng
+    const { id: _, password, ...dataToUpdate } = updateData;
+
+    await this.usersRepository.update(id, dataToUpdate);
+
+    // Sử dụng hàm findProfile đã có của bạn để lấy dữ liệu mới (đã ẩn password)
+    return this.findProfile(id) as unknown as User;
   }
 }

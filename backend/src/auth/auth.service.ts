@@ -48,4 +48,9 @@ export class AuthService {
       },
     };
   }
+
+  async updateProfile(userId: number, updateData: any) {
+    // Gọi hàm update từ UsersService
+    return this.usersService.update(userId, updateData);
+  }
 }

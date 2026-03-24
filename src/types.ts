@@ -52,3 +52,12 @@ export interface Lead {
   created_at?: Date;
   updated_at?: Date;
 }
+
+export interface UserProfile {
+  id: number
+  username: string
+  email: string
+  phone?: string // Đã có
+  role: string
+  created_at: string
+}

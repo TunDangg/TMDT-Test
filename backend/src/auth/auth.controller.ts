@@ -1,4 +1,4 @@
-import { Get, Request, Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Get, Put, Request, Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { UsersService } from '../users/entities/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -16,6 +16,13 @@ export class AuthController {
   @Get('profile') // Đường dẫn sẽ là localhost:3000/auth/profile
   getProfile(@Request() req) {
     return this.usersService.findProfile(req.user.sub);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('update-profile') // Thêm mới dòng này để nhận yêu cầu từ Vue
+  async updateProfile(@Request() req, @Body() updateData: any) {
+    // req.user.sub chứa ID của user đang đăng nhập (từ JWT)
+    return this.authService.updateProfile(req.user.sub, updateData);
   }
 
   @HttpCode(HttpStatus.OK)

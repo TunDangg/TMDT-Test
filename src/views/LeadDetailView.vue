@@ -118,6 +118,18 @@ const saveEditInfo = async () => {
   }
 }
 
+const getStatusLabel = (status: string) => {
+  const statusMap: Record<string, { label: string; class: string }> = {
+    NEW: { label: 'Mới', class: 'bg-blue-100 text-blue-700 border-blue-200' },
+    CONTACTING: { label: 'Đang tư vấn', class: 'bg-purple-100 text-purple-700 border-purple-200' },
+    CONTACTED: { label: 'Đã tư vấn', class: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    OPPORTUNITY: { label: 'Cơ hội', class: 'bg-orange-100 text-orange-700 border-orange-200' },
+    CONVERTED: { label: 'Đã chốt', class: 'bg-green-100 text-green-700 border-green-200' },
+    LOST: { label: 'Thất bại', class: 'bg-red-100 text-red-700 border-red-200' },
+  }
+  return statusMap[status] || { label: status, class: 'bg-slate-100 text-slate-700' }
+}
+
 // Bắt đầu sửa
 const startEditActivity = (item: any) => {
   editingActivityId.value = item.id
@@ -280,9 +292,12 @@ onMounted(() => {
               </div>
               <div class="mt-4">
                 <span
-                  class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full border border-yellow-200 tracking-wide uppercase"
+                  :class="[
+                    'px-3 py-1 text-xs font-bold rounded-full border tracking-wide uppercase',
+                    getStatusLabel(leadInfo.status).class,
+                  ]"
                 >
-                  {{ leadInfo.status }}
+                  {{ getStatusLabel(leadInfo.status).label }}
                 </span>
               </div>
             </div>
@@ -421,11 +436,12 @@ onMounted(() => {
                     v-model="editForm.status"
                     class="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm text-slate-800 outline-none transition-all bg-white"
                   >
-                    <option value="New">New</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Qualified">Qualified</option>
-                    <option value="Won">Won</option>
-                    <option value="Lost">Lost</option>
+                    <option value="NEW">Mới</option>
+                    <option value="CONTACTING">Đang tư vấn</option>
+                    <option value="CONTACTED">Đã tư vấn</option>
+                    <option value="OPPORTUNITY">Cơ hội</option>
+                    <option value="CONVERTED">Đã chốt</option>
+                    <option value="LOST">Thất bại</option>
                   </select>
                 </div>
               </div>
@@ -483,7 +499,7 @@ onMounted(() => {
                       <span
                         class="px-2 py-0.5 text-[10px] font-extrabold rounded uppercase tracking-tighter"
                         :class="
-                          item.role === 'Admin'
+                          item.role === 'ADMIN'
                             ? 'bg-blue-100 text-blue-800'
                             : 'bg-slate-100 text-slate-600'
                         "

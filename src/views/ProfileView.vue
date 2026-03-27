@@ -48,7 +48,6 @@ const handleSave = async () => {
     const response = await api.put('/auth/update-profile', user.value)
     if (response.data) {
       user.value = response.data // Cập nhật lại dữ liệu từ server trả về
-
     }
     alert('Cập nhật thành công!')
   } catch (error) {
@@ -89,11 +88,23 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
         </div>
 
         <div class="grid grid-cols-1 gap-4">
-          <div class="bg-white p-4 rounded-2xl border border-slate-50 flex items-center gap-4">
-            <div class="p-3 bg-blue-50 text-blue-500 rounded-xl"><CreditCard /></div>
-            <div>
-              <p class="text-[10px] uppercase font-bold text-slate-400">Số dư ví</p>
-              <p class="font-bold text-slate-700">1.250.000đ</p>
+          <div class="bg-white p-4 rounded-2xl border border-slate-50 space-y-4">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-blue-50 text-blue-500 rounded-xl"><CreditCard /></div>
+              <div>
+                <p class="text-[10px] uppercase font-bold text-slate-400">Số dư ví</p>
+                <p class="font-bold text-slate-700">1.250.000đ</p>
+              </div>
+            </div>
+
+            <hr class="border-slate-200" />
+
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-green-50 text-green-500 rounded-xl"><Shield :size="20" /></div>
+              <div>
+                <p class="text-[10px] uppercase font-bold text-slate-400">Tài khoản</p>
+                <p class="text-sm font-bold text-slate-700">Đã xác minh</p>
+              </div>
             </div>
           </div>
         </div>
@@ -129,7 +140,10 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
           <div v-if="activeTab === 'info'" class="p-8 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label class="text-xs font-bold uppercase text-slate-400 ml-1">Họ và tên</label>
+                <label class="text-xs font-bold uppercase text-slate-400 ml-1">
+                  <UserCircle class="inline-block w-4 h-4 mr-1 text-slate-400" />
+                  Họ và tên
+                </label>
                 <input
                   v-model="user!.username"
                   type="text"
@@ -137,7 +151,10 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
                 />
               </div>
               <div class="space-y-2">
-                <label class="text-xs font-bold uppercase text-slate-400 ml-1">Email</label>
+                <label class="text-xs font-bold uppercase text-slate-400 ml-1">
+                  <Mail class="inline-block w-4 h-4 mr-1 text-slate-400" />
+                  Email
+                </label>
                 <input
                   v-model="user!.email"
                   type="email"
@@ -146,7 +163,10 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
                 />
               </div>
               <div class="space-y-2">
-                <label class="text-xs font-bold uppercase text-slate-400 ml-1">Số điện thoại</label>
+                <label class="text-xs font-bold uppercase text-slate-400 ml-1">
+                  <Phone class="inline-block w-4 h-4 mr-1 text-slate-400" />
+                  Số điện thoại
+                </label>
                 <input
                   v-model="user.phone"
                   type="text"
@@ -155,7 +175,10 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
                 />
               </div>
               <div class="space-y-2">
-                <label class="text-xs font-bold uppercase text-slate-400 ml-1">Ngày tham gia</label>
+                <label class="text-xs font-bold uppercase text-slate-400 ml-1">
+                  <Calendar class="inline-block w-4 h-4 mr-1 text-slate-400" />
+                  Ngày tham gia
+                </label>
                 <div class="w-full bg-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-500">
                   {{ user ? formatDate(user.created_at) : '' }}
                 </div>
@@ -200,7 +223,7 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
                     "
                     class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full"
                   >
-                    {{ order.status }}
+                    <CheckCircle v-if="order.status === 'completed'" :size="12" />{{ order.status }}
                   </span>
                 </div>
                 <div

@@ -19,8 +19,10 @@ import {
 const user = ref<UserProfile>({
   id: 0,
   username: '',
+  full_name: '',
   email: '',
-  phone: '', // Khởi tạo giá trị rỗng thay vì để undefined
+  phone: '',
+  address: '',
   role: 'user', // Để 'user' thay vì 'customer' theo ý muốn của bạn ở Backend
   created_at: new Date().toISOString(),
 })
@@ -142,11 +144,25 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
               <div class="space-y-2">
                 <label class="text-xs font-bold uppercase text-slate-400 ml-1">
                   <UserCircle class="inline-block w-4 h-4 mr-1 text-slate-400" />
-                  Họ và tên
+                  Tên đăng nhập
                 </label>
                 <input
                   v-model="user!.username"
                   type="text"
+                  disabled
+                  class="w-full bg-slate-100 border-none rounded-2xl px-4 py-3 text-slate-500 font-medium cursor-not-allowed"
+                />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-bold uppercase text-slate-400 ml-1">
+                  <UserCircle class="inline-block w-4 h-4 mr-1 text-slate-400" />
+                  Họ và tên
+                </label>
+                <input
+                  v-model="user!.full_name"
+                  type="text"
+                  placeholder="Nhập họ và tên đầy đủ"
                   class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-pink-500 font-medium"
                 />
               </div>
@@ -171,6 +187,18 @@ const formatPrice = (price: number) => price.toLocaleString('vi-VN') + 'đ'
                   v-model="user.phone"
                   type="text"
                   placeholder="Chưa cập nhật"
+                  class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-pink-500 font-medium"
+                />
+              </div>
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-xs font-bold uppercase text-slate-400 ml-1">
+                  <MapPin class="inline-block w-4 h-4 mr-1 text-slate-400" />
+                  Địa chỉ giao hàng mặc định
+                </label>
+                <input
+                  v-model="user!.address"
+                  type="text"
+                  placeholder="Ví dụ: Số nhà, Đường, Phường/Xã..."
                   class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-pink-500 font-medium"
                 />
               </div>

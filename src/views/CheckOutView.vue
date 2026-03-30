@@ -100,6 +100,17 @@ onMounted(async () => {
     }
   }
 
+  try {
+    const res =await api.get('/auth/profile');
+    const userData = res.data;
+
+    if (!form.value.fullname) form.value.fullname = userData.full_name || userData.username || '';
+    if (!form.value.phone) form.value.phone = userData.phone || '';
+    if (!form.value.address) form.value.address = userData.address || '';
+  } catch (error) {
+    console.warn( 'Người dùng chưa đăng nhập hoặc lỗi tải hồ sơ', error)
+  }
+
   isValidating.value = true
   try {
     await cart.fetchCart()

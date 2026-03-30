@@ -56,8 +56,10 @@ export interface Lead {
 export interface UserProfile {
   id: number
   username: string
+  full_name?: string
   email: string
-  phone?: string // Đã có
+  phone?: string
+  address?: string
   role: string
   created_at: string
 }

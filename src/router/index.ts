@@ -62,11 +62,17 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresAdmin: true }, // Cần xác thực và phải là admin
     },
     {
+      path: '/admin/vouchers',
+      name: 'admin-vouchers',
+      component: () => import('../views/VoucherManagementView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: () => import('../views/ProfileView.vue'), // Lazy load trang profile
       meta: { requiresAuth: true }, // Cần xác thực nhưng không cần phải là admin
-    }
+    },
   ],
 })
 

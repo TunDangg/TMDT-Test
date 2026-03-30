@@ -30,6 +30,12 @@ export class Order {
   @Column('decimal', { precision: 10, scale: 2 })
   total_price: number;
 
+  @Column({ nullable: true })
+  voucher_code: string;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0})
+  discount_amount: number;
+
   @Column({
     type: 'enum', // Kiểu enum để giới hạn giá trị status chỉ có 'pending', 'processing', 'shipped', 'delivered'
     enum: ['pending', 'processing', 'shipped', 'completed', 'cancelled'], // Các trạng thái đơn hàng

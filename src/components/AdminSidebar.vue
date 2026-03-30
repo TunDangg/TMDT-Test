@@ -1,5 +1,7 @@
 <template>
-  <aside class="w-72 bg-slate-900 text-slate-300 h-screen sticky top-0 shadow-xl flex flex-col shrink-0">
+  <aside
+    class="w-72 bg-slate-900 text-slate-300 h-screen sticky top-0 shadow-xl flex flex-col shrink-0"
+  >
     <div class="p-8 border-b border-slate-800/50">
       <h2 class="text-2xl font-black text-white tracking-tighter">
         EDTEXCO <span class="text-pink-500 italic font-medium">Admin</span>
@@ -42,6 +44,15 @@
         <ClipboardList :size="20" class="group-hover:scale-110 transition-transform" />
         <span class="font-bold text-xs uppercase tracking-widest">Quản lý đơn hàng</span>
       </router-link>
+
+      <router-link
+        to="/admin/vouchers"
+        class="flex items-center space-x-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition-all group"
+        active-class="bg-pink-600 text-white shadow-lg shadow-pink-900/20"
+      >
+        <Ticket :size="20" class="group-hover:scale-110 transition-transform" />
+        <span class="font-bold text-xs uppercase tracking-widest">Quản lý khuyến mãi</span>
+      </router-link>
     </nav>
 
     <div class="p-4 border-t border-slate-800/50">
@@ -57,7 +68,14 @@
 </template>
 
 <script setup lang="ts">
-import { LayoutDashboard, Target, ShoppingBag, ClipboardList, LogOut } from 'lucide-vue-next'
+import {
+  LayoutDashboard,
+  Target,
+  ShoppingBag,
+  ClipboardList,
+  LogOut,
+  Ticket,
+} from 'lucide-vue-next'
 </script>
 
 <style scoped>

@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
+import { VouchersService } from '../vouchers/vouchers.service';
 
 @Injectable()
 export class OrdersService {
@@ -14,6 +15,7 @@ export class OrdersService {
     @InjectRepository(OrderItem)
     private readonly orderItemRepository: Repository<OrderItem>,
     private dataSource: DataSource, // Dung để quản lý transaction khi tạo đơn hàng và order items
+    private vouchersService: VouchersService,
   ) {}
   async create(createOrderDto: CreateOrderDto, userId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -21,13 +23,29 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     try {
-      // 1. Tạo order chính
+      let finalTotalPrice = createOrderDto.total_price;
+      let discountAmount = 0;
+
+      // 1. Kiểm tra mã giảm giá nếu có
+      if (createOrderDto.voucher_code) {
+        const validationResult = await this.vouchersService.validateVoucher(
+          createOrderDto.voucher_code,
+          createOrderDto.total_price // Truyền tổng tiền gốc chưa giảm vào
+        );
+
+        discountAmount = validationResult.discount_amount;
+        finalTotalPrice = validationResult.final_total;
+      }
+
+      // Tạo order
       const order = queryRunner.manager.create(Order, {
         customer_name: createOrderDto.customer_name,
         customer_phone: createOrderDto.customer_phone,
         customer_address: createOrderDto.customer_address,
         note: createOrderDto.note,
-        total_price: createOrderDto.total_price,
+        total_price: finalTotalPrice,
+        voucher_code: createOrderDto.voucher_code || undefined,
+        discount_amount: discountAmount,
         status: 'pending', // Mặc định là pending khi tạo mới
         user: { id: userId },
       });
@@ -45,9 +63,18 @@ export class OrdersService {
 
       await queryRunner.manager.save(orderItems);
 
+      //3. Tăng số lượt sử dụng voucher nếu có
+      if (createOrderDto.voucher_code) {
+        await this.vouchersService.incrementUsedcount(createOrderDto.voucher_code);
+      }
+
       // Neu moi thu on, xac nhan luu vao database
       await queryRunner.commitTransaction();
-      return { message: 'Đơn hàng đã được đặt thành công', orderId: savedOrder.id };
+      return {
+        message: 'Đơn hàng đã được đặt thành công',
+        orderId: savedOrder.id,
+      };
+
     } catch (err) {
       // Neu co loi, quay lui ve trang thai ban dau
       await queryRunner.rollbackTransaction();

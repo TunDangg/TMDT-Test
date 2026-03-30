@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { ShoppingCart, Trash2, FileText, MapPin, Clock, ArrowRight, Ticket } from 'lucide-vue-next'
 import { useCartStore } from '@/stores/cart'
 import { useToast } from 'vue-toastification'
@@ -14,6 +14,11 @@ const isShowQR = ref(false)
 const userId = 1 // Giả sử userId là 1, bạn có thể thay đổi tùy theo logic đăng nhập
 const infoKey = `customer_info_${userId}`
 
+//Voucher
+const voucherInput = ref('')
+const appliedVoucher = ref<{ code: string; discount_amount: number } | null>(null)
+const isApplyingVoucher = ref(false)
+
 // Lấy thông tin thanh toán từ file .env
 const bankId = import.meta.env.VITE_BANK_ID || ''
 const accountNo = import.meta.env.VITE_BANK_ACCOUNT_NO || ''
@@ -24,6 +29,65 @@ const generateQRUrl = () => {
   const amount = cart.totalPrice
   const addInfo = encodeURIComponent(`Thanh toán đơn hàng ${Date.now()}`)
   return `https://img.vietqr.io/image/${bankId}-${accountNo}-${qrTemplate}.png?amount=${amount}&addInfo=${addInfo}&accountName=${encodeURIComponent(accountName)}`
+}
+
+// Tinh toan tong so tien cuoi cung ( tam tinh - giam gia )
+const finalPrice = computed(() => {
+  if (appliedVoucher.value) {
+    return Math.max(0, cart.totalPrice - appliedVoucher.value.discount_amount)
+  }
+  return cart.totalPrice
+})
+
+watch(
+  () => cart.totalPrice,
+  () => {
+    if (appliedVoucher.value) {
+      appliedVoucher.value = null
+      toast.warning(
+        'Giỏ hàng đã thay đổi, mã giảm giá đã được gỡ bỏ. Vui lòng áp dụng lại nếu muốn sử dụng mã giảm giá.',
+        { timeout: 5000 },
+      )
+    }
+  },
+)
+
+const handleApplyVoucher = async () => {
+  if (!voucherInput.value.trim()) {
+    toast.error('Vui lòng nhập mã giảm giá')
+    return
+  }
+
+  isApplyingVoucher.value = true
+  try {
+    const response = await api.post('/vouchers/validate', {
+      code: voucherInput.value.trim().toUpperCase(),
+      cart_total: cart.totalPrice,
+    })
+
+    // Nếu API trả về hợp lệ
+    appliedVoucher.value = {
+      code: response.data.voucher_code,
+      discount_amount: response.data.discount_amount,
+    }
+    toast.success(
+      `Mã giảm giá "${appliedVoucher.value.code}" đã được áp dụng! Bạn đã tiết kiệm được ${appliedVoucher.value.discount_amount.toLocaleString()}đ`,
+      { timeout: 5000 },
+    )
+    voucherInput.value = '' // Xóa input sau khi áp dụng thành công
+  } catch (error) {
+    console.error('Lỗi áp mã', error)
+    const errorMsg = error.response?.data?.message || 'Mã giảm giá không hợp lệ'
+    toast.error(errorMsg)
+    appliedVoucher.value = null
+  } finally {
+    isApplyingVoucher.value = false
+  }
+}
+
+const removeVoucher = () => {
+  appliedVoucher.value = null
+  toast.info('Mã giảm giá đã được gỡ bỏ', { timeout: 3000 })
 }
 
 const form = ref({
@@ -57,6 +121,7 @@ const confirmPayment = async () => {
       customer_address: form.value.address,
       note: form.value.note,
       total_price: cart.totalPrice,
+      voucher_code: appliedVoucher.value?.code || undefined,
       items: cart.items.map((item) => ({
         productId: item.id,
         quantity: item.quantity,
@@ -101,14 +166,14 @@ onMounted(async () => {
   }
 
   try {
-    const res =await api.get('/auth/profile');
-    const userData = res.data;
+    const res = await api.get('/auth/profile')
+    const userData = res.data
 
-    if (!form.value.fullname) form.value.fullname = userData.full_name || userData.username || '';
-    if (!form.value.phone) form.value.phone = userData.phone || '';
-    if (!form.value.address) form.value.address = userData.address || '';
+    if (!form.value.fullname) form.value.fullname = userData.full_name || userData.username || ''
+    if (!form.value.phone) form.value.phone = userData.phone || ''
+    if (!form.value.address) form.value.address = userData.address || ''
   } catch (error) {
-    console.warn( 'Người dùng chưa đăng nhập hoặc lỗi tải hồ sơ', error)
+    console.warn('Người dùng chưa đăng nhập hoặc lỗi tải hồ sơ', error)
   }
 
   isValidating.value = true
@@ -287,9 +352,22 @@ onMounted(async () => {
                       <div class="flex justify-between text-slate-600">
                         <span>Tạm tính</span>
                         <span class="font-medium text-slate-900"
-                          >{{ cart.totalPrice.toLocaleString() }}đ</span
+                          >{{ cart.totalPrice.toLocaleString('vi-VN') }}đ</span
                         >
                       </div>
+
+                      <div
+                        v-if="appliedVoucher"
+                        class="flex justify-between text-green-600 bg-green-50/50 p-2 -mx-2 rounded-lg"
+                      >
+                        <span class="font-medium flex items-center gap-1">
+                          <Ticket class="w-4 h-4" /> Khuyến mãi
+                        </span>
+                        <span class="font-bold"
+                          >-{{ appliedVoucher.discount_amount.toLocaleString('vi-VN') }}đ</span
+                        >
+                      </div>
+
                       <div class="flex justify-between text-slate-600">
                         <span>Phí vận chuyển</span>
                         <span class="font-medium text-slate-900">Theo bên vận chuyển</span>
@@ -301,7 +379,7 @@ onMounted(async () => {
                     >
                       <span class="text-lg font-bold text-slate-800">Tổng cộng</span>
                       <span class="text-2xl font-black text-pink-600"
-                        >{{ cart.totalPrice.toLocaleString() }}đ</span
+                        >{{ finalPrice.toLocaleString('vi-VN') }}đ</span
                       >
                     </div>
 
@@ -321,13 +399,53 @@ onMounted(async () => {
                   </section>
 
                   <div
-                    class="bg-white p-4 rounded-xl border border-dashed border-slate-300 shadow-sm"
+                    class="bg-white p-5 rounded-xl border border-dashed border-slate-300 shadow-sm mt-6"
                   >
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 mb-4">
                       <Ticket class="text-pink-500 w-5 h-5" />
-                      <span class="text-sm font-semibold text-slate-700">Thêm mã giảm giá</span>
-                      <button class="ml-auto text-pink-600 text-sm font-bold hover:text-pink-700">
-                        Chọn mã
+                      <span class="text-sm font-bold text-slate-800 uppercase tracking-wide"
+                        >Mã giảm giá</span
+                      >
+                    </div>
+
+                    <div v-if="!appliedVoucher" class="flex gap-2">
+                      <input
+                        v-model="voucherInput"
+                        type="text"
+                        placeholder="Nhập mã (VD: WELCOME50)"
+                        class="flex-1 uppercase bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition-all placeholder:font-normal"
+                        @keyup.enter="handleApplyVoucher"
+                      />
+                      <button
+                        @click="handleApplyVoucher"
+                        :disabled="isApplyingVoucher"
+                        class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-pink-600 transition-colors disabled:opacity-50"
+                      >
+                        {{ isApplyingVoucher ? 'Đang check...' : 'Áp dụng' }}
+                      </button>
+                    </div>
+
+                    <div
+                      v-else
+                      class="flex items-center justify-between bg-green-50 border border-green-200 p-3 rounded-lg relative overflow-hidden"
+                    >
+                      <div
+                        class="absolute -right-4 -top-4 w-12 h-12 bg-green-500 opacity-10 rounded-full"
+                      ></div>
+
+                      <div>
+                        <p class="text-sm font-black text-green-700 uppercase tracking-widest">
+                          {{ appliedVoucher.code }}
+                        </p>
+                        <p class="text-xs font-semibold text-green-600 mt-0.5">
+                          Đã giảm {{ appliedVoucher.discount_amount.toLocaleString('vi-VN') }}đ
+                        </p>
+                      </div>
+                      <button
+                        @click="removeVoucher"
+                        class="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors underline decoration-dotted underline-offset-2"
+                      >
+                        Gỡ bỏ
                       </button>
                     </div>
                   </div>

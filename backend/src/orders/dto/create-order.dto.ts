@@ -10,6 +10,7 @@ export class CreateOrderDto {
   customer_name: string;
   customer_phone: string;
   customer_address: string;
+  voucher_code: string;
   note?: string;
   total_price: number;
 

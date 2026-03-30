@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
 import { LeadStatus } from '../entities/lead.entity';
 
 export class CreateLeadDto {
@@ -8,6 +8,7 @@ export class CreateLeadDto {
 
   @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
   @IsString()
+  @Matches(/(84|0[3|5|7|8|9])+([0-9]{8})\b/, { message: 'Số điện thoại không hợp lệ' })
   phone: string;
 
   @IsOptional()

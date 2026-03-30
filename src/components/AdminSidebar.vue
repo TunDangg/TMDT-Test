@@ -37,21 +37,21 @@
       </router-link>
 
       <router-link
-        to="/admin/orders"
-        class="flex items-center space-x-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition-all group"
-        active-class="bg-pink-600 text-white shadow-lg shadow-pink-900/20"
-      >
-        <ClipboardList :size="20" class="group-hover:scale-110 transition-transform" />
-        <span class="font-bold text-xs uppercase tracking-widest">Quản lý đơn hàng</span>
-      </router-link>
-
-      <router-link
         to="/admin/vouchers"
         class="flex items-center space-x-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition-all group"
         active-class="bg-pink-600 text-white shadow-lg shadow-pink-900/20"
       >
         <Ticket :size="20" class="group-hover:scale-110 transition-transform" />
         <span class="font-bold text-xs uppercase tracking-widest">Quản lý khuyến mãi</span>
+      </router-link>
+
+      <router-link
+        to="/admin/orders"
+        class="flex items-center space-x-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition-all group"
+        active-class="bg-pink-600 text-white shadow-lg shadow-pink-900/20"
+      >
+        <ClipboardList :size="20" class="group-hover:scale-110 transition-transform" />
+        <span class="font-bold text-xs uppercase tracking-widest">Quản lý đơn hàng</span>
       </router-link>
     </nav>
 

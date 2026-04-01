@@ -1,28 +1,53 @@
-# BÁO CÁO TIẾN ĐỘ DỰ ÁN
+# Ứng dụng Thương mại Điện tử (TMDT-Test)
 
-# Ngày 28/01/2026
+![Vue.js](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D)
+![NestJS](https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-# Công việc đã hoàn thành
+Một hệ thống Thương mại điện tử Fullstack hiện đại được thiết kế với giao diện người dùng tương tác cao và kiến trúc Backend module hóa chặt chẽ, an toàn.
 
-# 1. Thiết lập môi trường hệ thống
+## Giới thiệu dự án
 
-- **Cơ sở dữ liệu:** Cài đặt và cấu hình thành công **MySQL** trên macOS thông qua Homebrew. Xử lý được vấn đề phân quyền truy cập root.
-- **Công cụ lập trình (IDE):** Chuyển đổi mã nguồn sang 3 IDE JetBrains bằng tài khoản Education.
-  - **WebStorm** cho Frontend
-  - **IntelliJ IDEA** cho Backend
-  - **DataGrip** với MySQL để quản trị dữ liệu trực quan hơn
+Dự án này là một nền tảng mua sắm trực tuyến, phân tách rõ ràng luồng xử lý giữa Client-side (Frontend) và Server-side (Backend).
+Hệ thống cung cấp trải nghiệm mua sắm mượt mà cho khách hàng và các công cụ quản trị dữ liệu hiệu quả cho Admin.
 
-# 2. Tìm hiểu lại về CORS
+### Tính năng nổi bật
+* **Xác thực & Bảo mật:** Đăng nhập/Đăng ký an toàn sử dụng JSON Web Token (JWT) và mã hóa mật khẩu Bcrypt.
+* **Quản lý Sản phẩm & Giỏ hàng:** Hiển thị danh sách sản phẩm, thêm vào giỏ hàng và xử lý luồng thanh toán.
+* **Quản lý Đơn hàng & Khuyến mãi:** Theo dõi trạng thái đơn hàng, áp dụng mã giảm giá (Voucher).
+* **Trang quản trị (Admin Dashboard):** Phân quyền quản trị viên, quản lý danh mục, người dùng và khách hàng tiềm năng (Leads).
 
-- **Tìm hiểu về CORS:** Hiểu được CORS là cơ chế bảo mật giống người gác cổng xem web có được lấy dữ liệu từ miền khác không.
-- **Cấu trúc dự án:** Phân tách rõ ràng luồng xử lý giữa Client-side và Server-side trong mô hình Thương mại điện tử.
+## Nền tảng Công nghệ (Tech Stack)
 
-# 3. Khó khăn & Vướng mắc
+### Frontend
+* **Core:** Vue 3, TypeScript, Vite.
+* **State Management:** Pinia.
+* **Routing:** Vue Router.
+* **UI/Styling:** Tailwind CSS, Ant Design Vue, Lucide Icons.
+* **Network:** Axios.
 
-- **Cấu hình MySQL:** Gặp lỗi khi khởi tạo dịch vụ MySQL trên máy Mac nhưng đã xử lý bằng cách cấu hình lại `mysql_secure_installation`.
-- **CORS Policy:** Gặp lỗi chặn yêu cầu khi chạy tích hợp FE và BE. Đã tìm ra phương án `app.enableCors()` trong NestJS để khắc phục.
+### Backend
+* **Core:** Node.js, NestJS, TypeScript.
+* **Database & ORM:** MySQL, TypeORM.
+* **Validation:** class-validator, class-transformer.
+* **Testing:** Jest, Supertest.
 
-# 4. Kế hoạch tiếp theo
+## Hướng dẫn Cài đặt & Chạy dự án
 
-- **Thiết kế Database:**
-- **Kết nối hệ thống:**
+### Yêu cầu hệ thống (Prerequisites)
+* Node.js (phiên bản 20.x trở lên)
+* MySQL (đã thiết lập user và database cho dự án)
+
+### 1. Cài đặt Backend (NestJS)
+
+Mở terminal và di chuyển vào thư mục `backend`:
+
+```bash
+cd backend
+# Cài đặt các thư viện phụ thuộc
+npm install
+
+# Khởi chạy server ở chế độ Development (mặc định cấu hình CORS đã được mở)
+npm run start:dev

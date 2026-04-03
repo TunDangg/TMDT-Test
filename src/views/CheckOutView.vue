@@ -341,6 +341,57 @@ onMounted(async () => {
 
               <div class="lg:col-span-1">
                 <div class="sticky top-6 flex flex-col gap-6">
+                  <div
+                    class="bg-white p-5 rounded-xl border border-dashed border-slate-300 shadow-sm mt-6"
+                  >
+                    <div class="flex items-center gap-3 mb-4">
+                      <Ticket class="text-pink-500 w-5 h-5" />
+                      <span class="text-sm font-bold text-slate-800 uppercase tracking-wide"
+                        >Mã giảm giá</span
+                      >
+                    </div>
+
+                    <div v-if="!appliedVoucher" class="flex gap-2">
+                      <input
+                        v-model="voucherInput"
+                        type="text"
+                        placeholder="Nhập mã (VD: WELCOME50)"
+                        class="flex-1 uppercase bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition-all placeholder:font-normal"
+                        @keyup.enter="handleApplyVoucher"
+                      />
+                      <button
+                        @click="handleApplyVoucher"
+                        :disabled="isApplyingVoucher"
+                        class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-pink-600 transition-colors disabled:opacity-50"
+                      >
+                        {{ isApplyingVoucher ? 'Đang check...' : 'Áp dụng' }}
+                      </button>
+                    </div>
+
+                    <div
+                      v-else
+                      class="flex items-center justify-between bg-green-50 border border-green-200 p-3 rounded-lg relative overflow-hidden"
+                    >
+                      <div
+                        class="absolute -right-4 -top-4 w-12 h-12 bg-green-500 opacity-10 rounded-full"
+                      ></div>
+
+                      <div>
+                        <p class="text-sm font-black text-green-700 uppercase tracking-widest">
+                          {{ appliedVoucher.code }}
+                        </p>
+                        <p class="text-xs font-semibold text-green-600 mt-0.5">
+                          Đã giảm {{ appliedVoucher.discount_amount.toLocaleString('vi-VN') }}đ
+                        </p>
+                      </div>
+                      <button
+                        @click="removeVoucher"
+                        class="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors underline decoration-dotted underline-offset-2"
+                      >
+                        Gỡ bỏ
+                      </button>
+                    </div>
+                  </div>
                   <section class="bg-white p-6 rounded-xl shadow-md border border-slate-100">
                     <h3
                       class="text-xl font-bold mb-6 border-b border-slate-100 pb-3 text-slate-800"
@@ -397,58 +448,6 @@ onMounted(async () => {
                       tôi.
                     </p>
                   </section>
-
-                  <div
-                    class="bg-white p-5 rounded-xl border border-dashed border-slate-300 shadow-sm mt-6"
-                  >
-                    <div class="flex items-center gap-3 mb-4">
-                      <Ticket class="text-pink-500 w-5 h-5" />
-                      <span class="text-sm font-bold text-slate-800 uppercase tracking-wide"
-                        >Mã giảm giá</span
-                      >
-                    </div>
-
-                    <div v-if="!appliedVoucher" class="flex gap-2">
-                      <input
-                        v-model="voucherInput"
-                        type="text"
-                        placeholder="Nhập mã (VD: WELCOME50)"
-                        class="flex-1 uppercase bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition-all placeholder:font-normal"
-                        @keyup.enter="handleApplyVoucher"
-                      />
-                      <button
-                        @click="handleApplyVoucher"
-                        :disabled="isApplyingVoucher"
-                        class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-pink-600 transition-colors disabled:opacity-50"
-                      >
-                        {{ isApplyingVoucher ? 'Đang check...' : 'Áp dụng' }}
-                      </button>
-                    </div>
-
-                    <div
-                      v-else
-                      class="flex items-center justify-between bg-green-50 border border-green-200 p-3 rounded-lg relative overflow-hidden"
-                    >
-                      <div
-                        class="absolute -right-4 -top-4 w-12 h-12 bg-green-500 opacity-10 rounded-full"
-                      ></div>
-
-                      <div>
-                        <p class="text-sm font-black text-green-700 uppercase tracking-widest">
-                          {{ appliedVoucher.code }}
-                        </p>
-                        <p class="text-xs font-semibold text-green-600 mt-0.5">
-                          Đã giảm {{ appliedVoucher.discount_amount.toLocaleString('vi-VN') }}đ
-                        </p>
-                      </div>
-                      <button
-                        @click="removeVoucher"
-                        class="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors underline decoration-dotted underline-offset-2"
-                      >
-                        Gỡ bỏ
-                      </button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>

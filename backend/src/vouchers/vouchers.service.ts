@@ -79,17 +79,39 @@ export class VouchersService {
     return voucher;
   }
 
-  async create(createVoucherDto: any) {
+  async create(createVoucherDto: CreateVoucherDto) {
     // Ép kiểu code thành viết hoa trước lưu
     createVoucherDto.code = createVoucherDto.code.toUpperCase();
-    const newVoucher = await this.voucherRepository.create(createVoucherDto);
+    const newVoucher = this.voucherRepository.create(createVoucherDto);
     return await this.voucherRepository.save(newVoucher);
   }
 
-  async update(id: number, updateVoucherDto: any) {
+  async update(id: number, updateVoucherDto: UpdateVoucherDto) {
     if (updateVoucherDto.code) {
       updateVoucherDto.code = updateVoucherDto.code.toUpperCase();
     }
+    // Kiểm tra các trường là số, nếu là chuỗi rỗng thì chuyển về null hoặc 0
+    const dto = updateVoucherDto as Record<string, any>;
+    const numericFields = [
+      'discount_value',
+      'min_order_value',
+      'max_discount_amount',
+      'usage_limit',
+    ];
+
+    numericFields.forEach((field) => {
+      if (dto[field] === '') {
+        dto[field] = field === 'max_discount_amount' ? null : 0;
+      }
+    });
+
+    numericFields.forEach((field) => {
+      if (updateVoucherDto[field] === '') {
+        // max_discount_amount thường có thể để null (không giới hạn),
+        // các trường khác có thể để 0 tùy logic của bạn.
+        updateVoucherDto[field] = field === 'max_discount_amount' ? null : 0;
+      }
+    });
     await this.voucherRepository.update(id, updateVoucherDto);
     return this.findOne(id);
   }

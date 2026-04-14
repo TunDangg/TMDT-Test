@@ -18,7 +18,7 @@ export class OrdersService {
     private vouchersService: VouchersService,
   ) {}
   async create(createOrderDto: CreateOrderDto, userId: number) {
-    const queryRunner = this.dataSource.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner(); //
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -30,7 +30,7 @@ export class OrdersService {
       if (createOrderDto.voucher_code) {
         const validationResult = await this.vouchersService.validateVoucher(
           createOrderDto.voucher_code,
-          createOrderDto.total_price // Truyền tổng tiền gốc chưa giảm vào
+          createOrderDto.total_price, // Truyền tổng tiền gốc chưa giảm vào
         );
 
         discountAmount = validationResult.discount_amount;
@@ -74,7 +74,6 @@ export class OrdersService {
         message: 'Đơn hàng đã được đặt thành công',
         orderId: savedOrder.id,
       };
-
     } catch (err) {
       // Neu co loi, quay lui ve trang thai ban dau
       await queryRunner.rollbackTransaction();

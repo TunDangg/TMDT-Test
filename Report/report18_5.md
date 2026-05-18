@@ -1,17 +1,8 @@
-# BÁO CÁO TÌM HIỂU
 # CÁC KHÁI NIỆM LẬP TRÌNH CỐT LÕI VÀ CÔNG CỤ KIỂM THỬ POSTMAN
 
 ---
 
-# Phần 1: Lời mở đầu
-
-Báo cáo này nhằm mục đích hệ thống hóa các khái niệm nền tảng trong phát triển phần mềm, bao gồm các thành phần cấu trúc mã nguồn cơ bản như Biến (Variable), Giá trị (Value), Hàm (Function), Đối tượng (Object) và phương thức giao tiếp giữa các hệ thống thông qua API.
-
-Đồng thời, báo cáo cung cấp cái nhìn tổng quan về công cụ Postman và vai trò của nó trong quy trình kiểm thử, phát triển và vận hành hệ thống phần mềm hiện đại.
-
----
-
-# Phần 2: Các thành phần cốt lõi trong lập trình
+# Các thành phần cốt lõi trong lập trình
 
 ## 2.1. Biến (Variable) và Giá trị (Value)
 
